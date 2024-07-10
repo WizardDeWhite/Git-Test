@@ -8,8 +8,9 @@ idtentry page_fault		do_page_fault		has_error_code=1
 
 So for PF(page fault), do_page_fault is the handler.
 
-1. do_page_fault(regs, error_code, address) -> __do_page_fault()
+1. handle_page_fault(regs, error_code, address) -> __do_page_fault()
 ================================================================================
+Reference: https://www.cnblogs.com/binlovetech/p/17918733.html
 
 1.1 kmmio_fault(regs, address)
 ================================================================================
@@ -17,7 +18,6 @@ So for PF(page fault), do_page_fault is the handler.
 ================================================================================
 1.2.1 return address >= TASK_SIZE_MAX;
 ================================================================================
-
 1.3 do_kern_addr_fault(regs, error_code, address)
 ================================================================================
 
