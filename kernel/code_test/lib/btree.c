@@ -39,6 +39,11 @@ bool get_idx(struct btree_node *node, int key, int *index)
 	return found;
 }
 
+/*
+ * return true means key is found, false for not found
+ *
+ * if found, iter->node and iter->idx points to the one
+ */
 bool __btree_lookup(struct btree_iterator *iter, int key)
 {
 	struct btree *tree = iter->tree;

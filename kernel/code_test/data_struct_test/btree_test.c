@@ -63,23 +63,30 @@ void lookup_key()
 	int index;
 	void *data;
 
+	prefix_reset();
+	prefix_push("lookup_key");
+	test_print("Running %s tests...\n", __func__);
+
+	PREFIX_PUSH();
+
 	data = btree_lookup(&tree, key[0]);
-	if (data)
-		panic("We shouldn't find %d in empty tree\n", key[0]);
-#ifdef DEBUH
-	printf("Not find key %d \n", key[0]);
-#endif
+	/* Not expect to find entry in empty tree */
+	ASSERT_EQ(NULL, data);
 
 	build_tree(&tree, key, ARRAY_SIZE(key));
+
+	/* Find entry for key[0] */
 	data = btree_lookup(&tree, key[0]);
-	if (!data)
-		panic("We failed to find %d in tree\n", key[0]);
-	if (data != &key[0])
-		panic("We find wrong data for key:%d %p -> %p\n",
-				key[0], &key[0], data);
-#ifdef DEBUH
-	printf("Found key %d with data %p: %p\n", key[0], data, &key[0]);
-#endif
+	ASSERT_NE(NULL, data);
+	ASSERT_EQ(&key[0], data);
+
+	/* Not expect to find non-exist key */
+	data = btree_lookup(&tree, 9999);
+	ASSERT_EQ(NULL, data);
+
+	test_pass_pop();
+
+	prefix_pop();
 }
 
 void insert_to_node() 
@@ -94,7 +101,7 @@ void insert_to_node()
 
 	for (i = 0; i < ARRAY_SIZE(key); i++) {
 		get_idx(node, key[i], &idx);
-#ifdef DEBUH
+#ifdef DEBUG
 		printf("key: %d may at idx %d\n", key[i], idx);
 #endif
 		btree_node_insert(node, idx, NULL, NULL, key[i], NULL);
@@ -102,11 +109,11 @@ void insert_to_node()
 	}
 
 	right = split_node(node, &i, &data);
-#ifdef DEBUH
+#ifdef DEBUG
 	printf("dump split left node:\n");
 #endif
 	dump_btree_node(node, 0);
-#ifdef DEBUH
+#ifdef DEBUG
 	printf("dump split right node:\n");
 #endif
 	dump_btree_node(right, 0);
@@ -326,7 +333,7 @@ int main(int argc, char *argv[])
 	parse_args(argc, argv);
 
 	get_idx_test();
-	// lookup_key();
+	lookup_key();
 	insert_key();
 	// insert_to_node();
 	// iterate_btree();
