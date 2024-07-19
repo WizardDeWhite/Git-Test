@@ -24,20 +24,19 @@ struct btree_node *new_btree_node()
 bool get_idx(struct btree_node *node, int key, int *index)
 {
 	int i;
+	bool found = false;
 
-	*index = node->used;
 	for (i = 0; i < node->used; i++) {
 		if (node->key[i] < key)
 			continue;
 
-		*index = i;
 		if (node->key[i] == key)
-			return true;
-		else
-			return false;
+			found = true;
+		break;
 	}
 
-	return false;
+	*index = i;
+	return found;
 }
 
 bool __btree_lookup(struct btree_iterator *iter, int key)
