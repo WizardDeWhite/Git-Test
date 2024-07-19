@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include "bug.h"
+#include "test_common.h"
 
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 

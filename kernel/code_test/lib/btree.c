@@ -85,9 +85,11 @@ void dump_btree_node(struct btree_node *node, int level)
 
 void dump_btree(struct btree *tree)
 {
+#ifdef DEBUG
 	struct btree_node *node = tree->root;
 
 	dump_btree_node(node, 0);
+#endif
 }
 
 // insert key at [idx]

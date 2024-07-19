@@ -38,7 +38,9 @@ void lookup_key()
 	data = btree_lookup(&tree, key[0]);
 	if (data)
 		panic("We shouldn't find %d in empty tree\n", key[0]);
+#ifdef DEBUH
 	printf("Not find key %d \n", key[0]);
+#endif
 
 	__insert_key(&tree, key, ARRAY_SIZE(key));
 	data = btree_lookup(&tree, key[0]);
@@ -47,7 +49,9 @@ void lookup_key()
 	if (data != &key[0])
 		panic("We find wrong data for key:%d %p -> %p\n",
 				key[0], &key[0], data);
+#ifdef DEBUH
 	printf("Found key %d with data %p: %p\n", key[0], data, &key[0]);
+#endif
 }
 
 void insert_to_node() 
@@ -62,15 +66,21 @@ void insert_to_node()
 
 	for (i = 0; i < ARRAY_SIZE(key); i++) {
 		get_idx(node, key[i], &idx);
+#ifdef DEBUH
 		printf("key: %d may at idx %d\n", key[i], idx);
+#endif
 		btree_node_insert(node, idx, NULL, NULL, key[i], NULL);
 		dump_btree_node(node, 0);
 	}
 
 	right = split_node(node, &i, &data);
+#ifdef DEBUH
 	printf("dump split left node:\n");
+#endif
 	dump_btree_node(node, 0);
+#ifdef DEBUH
 	printf("dump split right node:\n");
+#endif
 	dump_btree_node(right, 0);
 }
 
@@ -184,23 +194,31 @@ void delete_from_node()
 		get_idx(node, key[i], &idx);
 		btree_node_insert(node, idx, NULL, NULL, key[i], NULL);
 	}
+#ifdef DEBUG
 	printf("Now we have a node like: \n");
+#endif
 	dump_btree_node(node, 0);
 
 	btree_node_delete(node, 2, false);
+#ifdef DEBUG
 	printf("After deletion idx 2 : \n");
+#endif
 	dump_btree_node(node, 0);
 
 	btree_node_delete(node, 1, false);
+#ifdef DEBUG
 	printf("After deletion idx 1 : \n");
+#endif
 	dump_btree_node(node, 0);
 
 	btree_node_replace(node, 0, key[0], &key[0]);
+#ifdef DEBUG
 	printf("After replace idx 0 with %d: \n", key[0]);
+#endif
 	dump_btree_node(node, 0);
 }
 
-void delete_key()
+void delete_key_test()
 {
 	void *data;
 	int i;
@@ -212,6 +230,13 @@ void delete_key()
 		     50, 100, 101,
 		     110, 168, 198,
 		};
+
+	prefix_reset();
+	prefix_push("delete_key_test");
+	test_print("Running %s tests...\n", __func__);
+
+	PREFIX_PUSH();
+
 	__insert_key(&tree, key, ARRAY_SIZE(key));
 
 	if (btree_delete(&tree, -1))
@@ -219,23 +244,33 @@ void delete_key()
 
 	// delete first which is a leaf
 	data = btree_delete(&tree, 7);
+#ifdef DEBUD
 	printf("After delete key 7: \n");
+#endif
 	dump_btree(&tree);
 
 	// delete one in root node
+#ifdef DEBUD
 	printf("After delete key %d: \n", tree.root->key[0]);
+#endif
 	data = btree_delete(&tree, tree.root->key[0]);
 	dump_btree(&tree);
 
+#ifdef DEBUD
 	printf("After delete key 15: \n");
+#endif
 	data = btree_delete(&tree, 15);
 	dump_btree(&tree);
 
+#ifdef DEBUD
 	printf("After delete key 16: \n");
+#endif
 	data = btree_delete(&tree, 16);
 	dump_btree(&tree);
 
+#ifdef DEBUD
 	printf("After delete key 10: \n");
+#endif
 	data = btree_delete(&tree, 10);
 	dump_btree(&tree);
 
@@ -247,15 +282,23 @@ void delete_key()
 	}
 	if (tree.root)
 		panic("still has root %p\n", tree.root);
+
+	test_pass_pop();
+
+	prefix_pop();
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+	parse_args(argc, argv);
+
 	// getidx_in_node();
 	// lookup_key();
 	// insert_key();
 	// insert_to_node();
 	// iterate_btree();
 	// delete_from_node();
-	delete_key();
+
+	delete_key_test();
+
 }
