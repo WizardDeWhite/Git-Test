@@ -26,7 +26,7 @@ void getidx_in_node()
 		printf("key %d at index %d\n", 53, index);
 }
 
-void __insert_key(struct btree *tree, int *key, int len);
+void build_tree(struct btree *tree, int *key, int len);
 void lookup_key()
 {
 	struct btree tree = BTREE;
@@ -42,7 +42,7 @@ void lookup_key()
 	printf("Not find key %d \n", key[0]);
 #endif
 
-	__insert_key(&tree, key, ARRAY_SIZE(key));
+	build_tree(&tree, key, ARRAY_SIZE(key));
 	data = btree_lookup(&tree, key[0]);
 	if (!data)
 		panic("We failed to find %d in tree\n", key[0]);
@@ -84,7 +84,7 @@ void insert_to_node()
 	dump_btree_node(right, 0);
 }
 
-void __insert_key(struct btree *tree, int *key, int len)
+void build_tree(struct btree *tree, int *key, int len)
 {
 	int i;
 	for (i = 0; i < len; i++) {
@@ -103,7 +103,7 @@ void insert_key()
 		     50, 100, 101,
 		     110, 168, 198,
 		};
-	__insert_key(&tree, key, ARRAY_SIZE(key));
+	build_tree(&tree, key, ARRAY_SIZE(key));
 
 	data = btree_lookup(&tree, key[0]);
 	ASSERT_NE(NULL, data);
@@ -141,7 +141,7 @@ void iterate_btree()
 		printf("There is no last entry in tree\n");
 
 	int key1[] = {618 };
-	__insert_key(&tree, key1, ARRAY_SIZE(key1));
+	build_tree(&tree, key1, ARRAY_SIZE(key1));
 
 	BTREE_ITERATOR_INIT(biter);
 	btree_first(&biter);
@@ -158,7 +158,7 @@ void iterate_btree()
 		     44, 45, 49, 34, 55, 99, 189,
 		     188,
 		};
-	__insert_key(&tree, key, ARRAY_SIZE(key));
+	build_tree(&tree, key, ARRAY_SIZE(key));
 
 	BTREE_ITERATOR_INIT(biter);
 	btree_first(&biter);
@@ -246,7 +246,7 @@ void delete_key_test()
 
 	PREFIX_PUSH();
 
-	__insert_key(&tree, key, ARRAY_SIZE(key));
+	build_tree(&tree, key, ARRAY_SIZE(key));
 
 	data = btree_delete(&tree, -1);
 	ASSERT_EQ(NULL, data);
@@ -312,7 +312,6 @@ int main(int argc, char *argv[])
 	// insert_to_node();
 	// iterate_btree();
 	// delete_from_node();
-
 	delete_key_test();
 
 }
