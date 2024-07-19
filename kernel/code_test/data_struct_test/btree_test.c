@@ -239,40 +239,45 @@ void delete_key_test()
 
 	__insert_key(&tree, key, ARRAY_SIZE(key));
 
-	if (btree_delete(&tree, -1))
-		panic("find a non-exist key\n");
+	data = btree_delete(&tree, -1);
+	ASSERT_EQ(NULL, data);
 
 	// delete first which is a leaf
 	data = btree_delete(&tree, 7);
+	ASSERT_NE(NULL, data);
 #ifdef DEBUD
 	printf("After delete key 7: \n");
-#endif
 	dump_btree(&tree);
+#endif
 
 	// delete one in root node
+	data = btree_delete(&tree, tree.root->key[0]);
+	ASSERT_NE(NULL, data);
 #ifdef DEBUD
 	printf("After delete key %d: \n", tree.root->key[0]);
-#endif
-	data = btree_delete(&tree, tree.root->key[0]);
 	dump_btree(&tree);
+#endif
 
+	data = btree_delete(&tree, 15);
+	ASSERT_NE(NULL, data);
 #ifdef DEBUD
 	printf("After delete key 15: \n");
-#endif
-	data = btree_delete(&tree, 15);
 	dump_btree(&tree);
+#endif
 
+	data = btree_delete(&tree, 16);
+	ASSERT_NE(NULL, data);
 #ifdef DEBUD
 	printf("After delete key 16: \n");
-#endif
-	data = btree_delete(&tree, 16);
 	dump_btree(&tree);
+#endif
 
+	data = btree_delete(&tree, 10);
+	ASSERT_NE(NULL, data);
 #ifdef DEBUD
 	printf("After delete key 10: \n");
-#endif
-	data = btree_delete(&tree, 10);
 	dump_btree(&tree);
+#endif
 
 	for (i = 0; i < ARRAY_SIZE(key); i++) {
 		data = btree_delete(&tree, key[i]);
