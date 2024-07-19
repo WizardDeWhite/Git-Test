@@ -16,6 +16,21 @@
 #define ORDER 6
 #define PIVOT (ORDER/2)
 
+/*
+ *                      btree_node
+ *
+ *                  1   2   3   O-1 O
+ *                  0   1   2       O-1
+ *                  +---+---+---+---+...+
+ *     key          |   |   |   |   |   |
+ *                  +---+---+---+---+...+
+ *     data         |   |   |   |   |   |
+ *                  +---+---+---+---+...+
+ *                +---+---+---+---+---+...+
+ *     children   |   |   |   |   |   |   |
+ *                +---+---+---+---+---+...+
+ */
+
 struct btree_node {
 	struct btree_node *parent;
 	int parent_index;

@@ -1,29 +1,41 @@
 #include <stdio.h>
 #include "btree.h"
 
-void getidx_in_node()
+void get_idx_test()
 {
 	int index;
 	struct btree_node node;
+
+	prefix_reset();
+	prefix_push("get_idx_test");
+	test_print("Running %s tests...\n", __func__);
+
+	PREFIX_PUSH();
 
 	node.key[0] = 22;
 	node.key[1] = 33;
 	node.used = 2;
 
-	if (get_idx(&node, 22, &index))
-		printf("key %d at index %d\n", 22, index);
-	if (!get_idx(&node, 23, &index))
-		printf("key %d not exist before %d\n", 23, index);
-	if (!get_idx(&node, 43, &index))
-		printf("key %d not exist before %d\n", 43, index);
+	/* Find 22 at index 0 */
+	ASSERT_TRUE(get_idx(&node, 22, &index));
+	ASSERT_EQ(index, 0);
+
+	/* No entry with key 32 */
+	ASSERT_FALSE(get_idx(&node, 23, &index));
+	/* No entry with key 43 */
+	ASSERT_FALSE(get_idx(&node, 43, &index));
 
 	node.key[2] = 42;
 	node.key[3] = 53;
 	node.used = 4;
-	if (!get_idx(&node, 43, &index))
-		printf("key %d not exist before %d\n", 43, index);
-	if (get_idx(&node, 53, &index))
-		printf("key %d at index %d\n", 53, index);
+
+	/* Find 53 at index 3 */
+	ASSERT_TRUE(get_idx(&node, 53, &index));
+	ASSERT_EQ(index, 3);
+
+	test_pass_pop();
+
+	prefix_pop();
 }
 
 void build_tree(struct btree *tree, int *key, int len);
@@ -306,7 +318,7 @@ int main(int argc, char *argv[])
 {
 	parse_args(argc, argv);
 
-	// getidx_in_node();
+	get_idx_test();
 	// lookup_key();
 	insert_key();
 	// insert_to_node();
