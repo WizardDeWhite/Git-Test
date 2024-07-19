@@ -106,16 +106,25 @@ void insert_key()
 	__insert_key(&tree, key, ARRAY_SIZE(key));
 
 	data = btree_lookup(&tree, key[0]);
+	ASSERT_NE(NULL, data);
+#ifdef DEBUG
 	if (data)
 		printf("Found key %d with data %p\n", key[0], data);
 	else
 		printf("not found\n");
+#endif
+
 	// update the key
 	btree_insert(&tree, key[0], &tree);
+#ifdef DEBUG
 	printf("The tree's pointer is %p\n", &tree);
+#endif
 	data = btree_lookup(&tree, key[0]);
+	ASSERT_NE(NULL, data);
+#ifdef DEBUG
 	if (data)
 		printf("Found key %d with data %p\n", key[0], data);
+#endif
 }
 
 void iterate_btree()
@@ -299,7 +308,7 @@ int main(int argc, char *argv[])
 
 	// getidx_in_node();
 	// lookup_key();
-	// insert_key();
+	insert_key();
 	// insert_to_node();
 	// iterate_btree();
 	// delete_from_node();
