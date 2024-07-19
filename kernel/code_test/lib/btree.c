@@ -16,7 +16,9 @@ struct btree_node *new_btree_node()
 }
 
 /* 
- * set index to first one equal or bigger than key 
+ * If contains key, index is set the current index.
+ * If not contains key, index is set to the index expected to be inserted at.
+ *
  * return true means exact match, false for not.
  */ 
 bool get_idx(struct btree_node *node, int key, int *index)

@@ -20,10 +20,12 @@ void get_idx_test()
 	ASSERT_TRUE(get_idx(&node, 22, &index));
 	ASSERT_EQ(index, 0);
 
-	/* No entry with key 32 */
+	/* No entry with key 32, expect to insert at 1*/
 	ASSERT_FALSE(get_idx(&node, 23, &index));
-	/* No entry with key 43 */
+	ASSERT_EQ(index, 1);
+	/* No entry with key 4, expect to insert at 2 */
 	ASSERT_FALSE(get_idx(&node, 43, &index));
+	ASSERT_EQ(index, 2);
 
 	node.key[2] = 42;
 	node.key[3] = 53;
@@ -32,6 +34,12 @@ void get_idx_test()
 	/* Find 53 at index 3 */
 	ASSERT_TRUE(get_idx(&node, 53, &index));
 	ASSERT_EQ(index, 3);
+	/* No entry with key 50, expect to insert at 3 */
+	ASSERT_FALSE(get_idx(&node, 50, &index));
+	ASSERT_EQ(index, 3);
+	/* No entry with key 1, expect to insert at 0 */
+	ASSERT_FALSE(get_idx(&node, 1, &index));
+	ASSERT_EQ(index, 0);
 
 	test_pass_pop();
 
