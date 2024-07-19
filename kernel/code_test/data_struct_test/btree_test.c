@@ -46,7 +46,15 @@ void get_idx_test()
 	prefix_pop();
 }
 
-void build_tree(struct btree *tree, int *key, int len);
+void build_tree(struct btree *tree, int *key, int len)
+{
+	int i;
+	for (i = 0; i < len; i++) {
+		btree_insert(tree, key[i], &key[i]);
+	}
+	dump_btree(tree);
+}
+
 void lookup_key()
 {
 	struct btree tree = BTREE;
@@ -102,15 +110,6 @@ void insert_to_node()
 	printf("dump split right node:\n");
 #endif
 	dump_btree_node(right, 0);
-}
-
-void build_tree(struct btree *tree, int *key, int len)
-{
-	int i;
-	for (i = 0; i < len; i++) {
-		btree_insert(tree, key[i], &key[i]);
-	}
-	dump_btree(tree);
 }
 
 void insert_key()
