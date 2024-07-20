@@ -17,14 +17,14 @@ void get_idx_test()
 	node.used = 2;
 
 	/* Find 22 at index 0 */
-	ASSERT_TRUE(get_idx(&node, 22, &index));
+	ASSERT_TRUE(idx_in_node(&node, 22, &index));
 	ASSERT_EQ(index, 0);
 
 	/* No entry with key 32, expect to insert at 1*/
-	ASSERT_FALSE(get_idx(&node, 23, &index));
+	ASSERT_FALSE(idx_in_node(&node, 23, &index));
 	ASSERT_EQ(index, 1);
 	/* No entry with key 4, expect to insert at 2 */
-	ASSERT_FALSE(get_idx(&node, 43, &index));
+	ASSERT_FALSE(idx_in_node(&node, 43, &index));
 	ASSERT_EQ(index, 2);
 
 	node.key[2] = 42;
@@ -32,13 +32,13 @@ void get_idx_test()
 	node.used = 4;
 
 	/* Find 53 at index 3 */
-	ASSERT_TRUE(get_idx(&node, 53, &index));
+	ASSERT_TRUE(idx_in_node(&node, 53, &index));
 	ASSERT_EQ(index, 3);
 	/* No entry with key 50, expect to insert at 3 */
-	ASSERT_FALSE(get_idx(&node, 50, &index));
+	ASSERT_FALSE(idx_in_node(&node, 50, &index));
 	ASSERT_EQ(index, 3);
 	/* No entry with key 1, expect to insert at 0 */
-	ASSERT_FALSE(get_idx(&node, 1, &index));
+	ASSERT_FALSE(idx_in_node(&node, 1, &index));
 	ASSERT_EQ(index, 0);
 
 	test_pass_pop();
@@ -100,7 +100,7 @@ void insert_to_node()
 		return;
 
 	for (i = 0; i < ARRAY_SIZE(key); i++) {
-		get_idx(node, key[i], &idx);
+		idx_in_node(node, key[i], &idx);
 #ifdef DEBUG
 		printf("key: %d may at idx %d\n", key[i], idx);
 #endif
@@ -226,7 +226,7 @@ void delete_from_node()
 		return;
 
 	for (i = 0; i < ARRAY_SIZE(key); i++) {
-		get_idx(node, key[i], &idx);
+		idx_in_node(node, key[i], &idx);
 		btree_node_insert(node, idx, NULL, NULL, key[i], NULL);
 	}
 #ifdef DEBUG

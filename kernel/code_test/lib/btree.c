@@ -16,12 +16,14 @@ struct btree_node *new_btree_node()
 }
 
 /* 
+ * Get index of key in this node.
+ *
  * If contains key, index is set the current index.
  * If not contains key, index is set to the index expected to be inserted at.
  *
  * return true means exact match, false for not.
  */ 
-bool get_idx(struct btree_node *node, int key, int *index)
+bool idx_in_node(struct btree_node *node, int key, int *index)
 {
 	int i;
 	bool found = false;
@@ -53,7 +55,7 @@ bool __btree_lookup(struct btree_iterator *iter, int key)
 		iter->node = tree->root;
 
 	while (iter->node) {
-		if (get_idx(iter->node, key, &iter->idx)) {
+		if (idx_in_node(iter->node, key, &iter->idx)) {
 			return true;
 		}
 
@@ -151,7 +153,7 @@ void btree_insert(struct btree *tree, int key, void *data)
 
 	do {
 		// key already exist, update data only
-		if (get_idx(node, key, &idx)) {
+		if (idx_in_node(node, key, &idx)) {
 			node->data[idx] = data;
 			return;
 		}
@@ -172,7 +174,7 @@ void btree_insert(struct btree *tree, int key, void *data)
 				panic("failed to allocate new node\n");
 			tree->root = node;
 		}
-		get_idx(node, key, &idx);
+		idx_in_node(node, key, &idx);
 	}
 }
 
