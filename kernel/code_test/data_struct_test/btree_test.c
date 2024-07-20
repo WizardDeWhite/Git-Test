@@ -172,24 +172,34 @@ void iterate_btree()
 	struct btree tree = BTREE;
 	BTREE_ITERATOR(biter, &tree);
 
+	prefix_reset();
+	prefix_push("iterate_btree");
+	test_print("Running %s tests...\n", __func__);
+
+	PREFIX_PUSH();
+
+	/* Empty tree iteration result in NULL node */
 	btree_first(&biter);
-	if (!biter.node)
-		printf("There is no first entry in tree\n");
+	ASSERT_EQ(NULL, biter.node);
 	btree_last(&biter);
-	if (!biter.node)
-		printf("There is no last entry in tree\n");
+	ASSERT_EQ(NULL, biter.node);
 
 	int key1[] = {618 };
 	build_tree(&tree, key1, ARRAY_SIZE(key1));
 
+	/* After insertion, the first entry points to it */
 	BTREE_ITERATOR_INIT(biter);
 	btree_first(&biter);
-	if (biter.node)
-		printf("The first entry in tree is %d\n", biter.node->key[biter.idx]);
+	ASSERT_NE(NULL, biter.node);
+	ASSERT_EQ(biter.node->key[biter.idx], key1[0]);
+	ASSERT_EQ(biter.node->data[biter.idx], &key1[0]);
+
+	/* Since there is only one entry, the last entry points to it too */
 	BTREE_ITERATOR_INIT(biter);
 	btree_last(&biter);
-	if (biter.node)
-		printf("The last entry in tree is %d\n", biter.node->key[biter.idx]);
+	ASSERT_NE(NULL, biter.node);
+	ASSERT_EQ(biter.node->key[biter.idx], key1[0]);
+	ASSERT_EQ(biter.node->data[biter.idx], &key1[0]);
 
 	int key[] = {22, 33, 10, 15, 16,
 		     7, 8, 9, 199, 120, 800,
@@ -197,35 +207,53 @@ void iterate_btree()
 		     44, 45, 49, 34, 55, 99, 189,
 		     188,
 		};
+	int key_ordered[] = {7, 8, 9, 10, 15, 16, 22,
+		24, 29, 30, 33, 34, 44, 45, 49, 55,
+		99, 120, 188, 189, 199, 
+		618, /* from key1[] */
+		800, 900, 1034, 1056,
+		};
 	build_tree(&tree, key, ARRAY_SIZE(key));
 
+	/* The new tree's smallest entry is 7 */
 	BTREE_ITERATOR_INIT(biter);
 	btree_first(&biter);
-	if (biter.node)
-		printf("The first entry in tree is %d\n", biter.node->key[biter.idx]);
+	ASSERT_NE(NULL, biter.node);
+	ASSERT_EQ(biter.node->key[biter.idx], key_ordered[0]);
+
+	/* The new tree's largest entry is 1056 */
 	BTREE_ITERATOR_INIT(biter);
 	btree_last(&biter);
-	if (biter.node)
-		printf("The last entry in tree is %d\n", biter.node->key[biter.idx]);
+	ASSERT_NE(NULL, biter.node);
+	ASSERT_EQ(biter.node->key[biter.idx], key_ordered[ARRAY_SIZE(key_ordered) - 1]);
 
 	BTREE_ITERATOR_INIT(biter);
+	i = 0;
 	while (btree_next(&biter)) {
-		// printf("node: %p, idx %d ", biter.node, biter.idx);
-		printf("%5d", biter.node->key[biter.idx]);
+		ASSERT_NE(NULL, biter.node);
+		ASSERT_EQ(biter.node->key[biter.idx], key_ordered[i]);
+		i++;
 	}
-	printf("\n\n\n");
 
+	i--;
 	BTREE_ITERATOR_INIT(biter);
 	while (btree_prev(&biter)) {
-		// printf("node: %p, idx %d ", biter.node, biter.idx);
-		printf("%5d", biter.node->key[biter.idx]);
+		ASSERT_NE(NULL, biter.node);
+		ASSERT_EQ(biter.node->key[biter.idx], key_ordered[i]);
+		i--;
 	}
-	printf("\n");
 
 	BTREE_ITERATOR_INIT(biter);
-	for_each_btree(&biter)
-		printf("%5d", biter.node->key[biter.idx]);
-	printf("\n");
+	i = 0;
+	for_each_btree(&biter) {
+		ASSERT_NE(NULL, biter.node);
+		ASSERT_EQ(biter.node->key[biter.idx], key_ordered[i]);
+		i++;
+	}
+
+	test_pass_pop();
+
+	prefix_pop();
 }
 
 void delete_from_node()
@@ -349,7 +377,7 @@ int main(int argc, char *argv[])
 	lookup_key();
 	insert_key();
 	insert_to_node();
-	// iterate_btree();
+	iterate_btree();
 	// delete_from_node();
 	delete_key_test();
 
