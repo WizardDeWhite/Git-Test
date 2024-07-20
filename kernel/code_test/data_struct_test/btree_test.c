@@ -129,16 +129,18 @@ void insert_key()
 		     50, 100, 101,
 		     110, 168, 198,
 		};
+
+	prefix_reset();
+	prefix_push("insert_key");
+	test_print("Running %s tests...\n", __func__);
+
+	PREFIX_PUSH();
+
 	build_tree(&tree, key, ARRAY_SIZE(key));
 
 	data = btree_lookup(&tree, key[0]);
 	ASSERT_NE(NULL, data);
-#ifdef DEBUG
-	if (data)
-		printf("Found key %d with data %p\n", key[0], data);
-	else
-		printf("not found\n");
-#endif
+	ASSERT_EQ(&key[0], data);
 
 	// update the key
 	btree_insert(&tree, key[0], &tree);
@@ -147,10 +149,11 @@ void insert_key()
 #endif
 	data = btree_lookup(&tree, key[0]);
 	ASSERT_NE(NULL, data);
-#ifdef DEBUG
-	if (data)
-		printf("Found key %d with data %p\n", key[0], data);
-#endif
+	ASSERT_EQ(&tree, data);
+
+	test_pass_pop();
+
+	prefix_pop();
 }
 
 void iterate_btree()
