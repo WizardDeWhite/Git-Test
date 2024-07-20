@@ -94,6 +94,7 @@ void insert_to_node()
 	int i, idx;
 	/* This test case needs a full inserted node */
 	int key[] = {22, 10, 33, 15, 45, 1};
+	int key_ordered[] = {1, 10, 15, 22, 33, 45};
 	struct btree_node *node = new_btree_node();
 	struct btree_node *right;
 	void *data;
@@ -109,11 +110,17 @@ void insert_to_node()
 
 	for (i = 0; i < ARRAY_SIZE(key); i++) {
 		idx_in_node(node, key[i], &idx);
-		btree_node_insert(node, idx, NULL, NULL, key[i], NULL);
+		btree_node_insert(node, idx, NULL, NULL, key[i], &key[i]);
 #ifdef DEBUG
 		printf("key: %d may at idx %d\n", key[i], idx);
 		dump_btree_node(node, 0);
 #endif
+	}
+
+	ASSERT_EQ(ARRAY_SIZE(key), node->used);
+	for (i = 0; i < node->used; i++) {
+		data = node->data[i];
+		ASSERT_EQ(key_ordered[i], *(int*)data);
 	}
 
 	right = split_node(node, &i, &data);
