@@ -260,38 +260,57 @@ void delete_from_node()
 {
 	int i, idx;
 	int key[] = {22, 10, 33, 15};
+	int key_ordered[] = {10, 15, 22, 33};
 	struct btree_node *node = new_btree_node();
 	struct btree_node *right;
 	void *data;
+
+	prefix_reset();
+	prefix_push("delete_from_node");
+	test_print("Running %s tests...\n", __func__);
+
+	PREFIX_PUSH();
+
 	if (!node)
 		return;
 
 	for (i = 0; i < ARRAY_SIZE(key); i++) {
 		idx_in_node(node, key[i], &idx);
-		btree_node_insert(node, idx, NULL, NULL, key[i], NULL);
+		btree_node_insert(node, idx, NULL, NULL, key[i], &key[i]);
 	}
 #ifdef DEBUG
 	printf("Now we have a node like: \n");
-#endif
 	dump_btree_node(node, 0);
+#endif
 
-	btree_node_delete(node, 2, false);
+	/* There are total ARRAY_SIZE(key) entries in node */
+	ASSERT_EQ(ARRAY_SIZE(key), node->used);
+
+	data = btree_node_delete(node, 2, false);
 #ifdef DEBUG
 	printf("After deletion idx 2 : \n");
-#endif
 	dump_btree_node(node, 0);
+#endif
+	ASSERT_EQ(ARRAY_SIZE(key) - 1, node->used);
+	ASSERT_EQ(key_ordered[2], *(int*)data);
 
-	btree_node_delete(node, 1, false);
+	data = btree_node_delete(node, 1, false);
 #ifdef DEBUG
 	printf("After deletion idx 1 : \n");
-#endif
 	dump_btree_node(node, 0);
+#endif
+	ASSERT_EQ(ARRAY_SIZE(key) - 2, node->used);
+	ASSERT_EQ(key_ordered[1], *(int*)data);
 
 	btree_node_replace(node, 0, key[0], &key[0]);
 #ifdef DEBUG
 	printf("After replace idx 0 with %d: \n", key[0]);
-#endif
 	dump_btree_node(node, 0);
+#endif
+
+	test_pass_pop();
+
+	prefix_pop();
 }
 
 void delete_key_test()
@@ -378,7 +397,7 @@ int main(int argc, char *argv[])
 	insert_key();
 	insert_to_node();
 	iterate_btree();
-	// delete_from_node();
+	delete_from_node();
 	delete_key_test();
 
 }
