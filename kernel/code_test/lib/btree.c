@@ -184,11 +184,11 @@ struct btree_node *split_node(struct btree_node *node, int *key, void **data)
 	int i, j;
 
 	if (node->used != ORDER)
-		panic("try to split a non-full node\n");
+		panic("%s:%d try to split a non-full node\n", __FILE__, __LINE__);
 
 	right = new_btree_node();
 	if (!right)
-		panic("failed to allocate node on split\n");
+		panic("%s:%d failed to allocate node on split\n", __FILE__, __LINE__);
 
 	// assign middle one to key/data
 	*key = node->key[PIVOT];

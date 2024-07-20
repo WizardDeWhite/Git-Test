@@ -92,31 +92,41 @@ void lookup_key()
 void insert_to_node() 
 {
 	int i, idx;
-	int key[] = {22, 10, 33, 15, 45};
+	/* This test case needs a full inserted node */
+	int key[] = {22, 10, 33, 15, 45, 1};
 	struct btree_node *node = new_btree_node();
 	struct btree_node *right;
 	void *data;
+
+	prefix_reset();
+	prefix_push("insert_to_node");
+	test_print("Running %s tests...\n", __func__);
+
+	PREFIX_PUSH();
+
 	if (!node)
 		return;
 
 	for (i = 0; i < ARRAY_SIZE(key); i++) {
 		idx_in_node(node, key[i], &idx);
+		btree_node_insert(node, idx, NULL, NULL, key[i], NULL);
 #ifdef DEBUG
 		printf("key: %d may at idx %d\n", key[i], idx);
-#endif
-		btree_node_insert(node, idx, NULL, NULL, key[i], NULL);
 		dump_btree_node(node, 0);
+#endif
 	}
 
 	right = split_node(node, &i, &data);
 #ifdef DEBUG
 	printf("dump split left node:\n");
-#endif
 	dump_btree_node(node, 0);
-#ifdef DEBUG
 	printf("dump split right node:\n");
-#endif
 	dump_btree_node(right, 0);
+#endif
+
+	test_pass_pop();
+
+	prefix_pop();
 }
 
 void insert_key()
@@ -338,7 +348,7 @@ int main(int argc, char *argv[])
 	get_idx_test();
 	lookup_key();
 	insert_key();
-	// insert_to_node();
+	insert_to_node();
 	// iterate_btree();
 	// delete_from_node();
 	delete_key_test();
