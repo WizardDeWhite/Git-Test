@@ -154,7 +154,10 @@ void build_tree(struct btree *tree, int *key, int len)
 	for (i = 0; i < len; i++) {
 		btree_insert(tree, key[i], &key[i]);
 	}
+#ifdef DEBUG
+	printf("Btree is built...\n");
 	dump_btree(tree);
+#endif
 }
 
 void lookup_key()
@@ -323,7 +326,7 @@ void delete_key_test()
 	// delete first which is a leaf
 	data = btree_delete(&tree, 7);
 	ASSERT_NE(NULL, data);
-#ifdef DEBUD
+#ifdef DEBUG
 	printf("After delete key 7: \n");
 	dump_btree(&tree);
 #endif
@@ -331,28 +334,28 @@ void delete_key_test()
 	// delete one in root node
 	data = btree_delete(&tree, tree.root->key[0]);
 	ASSERT_NE(NULL, data);
-#ifdef DEBUD
+#ifdef DEBUG
 	printf("After delete key %d: \n", tree.root->key[0]);
 	dump_btree(&tree);
 #endif
 
 	data = btree_delete(&tree, 15);
 	ASSERT_NE(NULL, data);
-#ifdef DEBUD
+#ifdef DEBUG
 	printf("After delete key 15: \n");
 	dump_btree(&tree);
 #endif
 
 	data = btree_delete(&tree, 16);
 	ASSERT_NE(NULL, data);
-#ifdef DEBUD
+#ifdef DEBUG
 	printf("After delete key 16: \n");
 	dump_btree(&tree);
 #endif
 
 	data = btree_delete(&tree, 10);
 	ASSERT_NE(NULL, data);
-#ifdef DEBUD
+#ifdef DEBUG
 	printf("After delete key 10: \n");
 	dump_btree(&tree);
 #endif
