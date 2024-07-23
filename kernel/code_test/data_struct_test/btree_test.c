@@ -44,6 +44,52 @@ void insert_to_node()
 	test_pass_pop();
 }
 
+void split_node_check()
+{
+	int i, idx;
+	/* This test case needs a full inserted node */
+	int key[] = {22, 10, 33, 15, 45, 1};
+	int key_ordered[] = {1, 10, 15, 22, 33, 45};
+	struct btree_node *node = new_btree_node();
+	struct btree_node *right;
+	void *data;
+
+	PREFIX_PUSH();
+
+	if (!node)
+		return;
+
+	for (i = 0; i < ARRAY_SIZE(key); i++) {
+		idx_in_node(node, key[i], &idx);
+		btree_node_insert(node, idx, NULL, NULL, key[i], &key[i]);
+#ifdef DEBUG
+		printf("key: %d may at idx %d\n", key[i], idx);
+		dump_btree_node(node, 0);
+#endif
+	}
+
+	right = split_node(node, &i, &data);
+	/* PIVOT is split as a stand alone entry */
+	ASSERT_EQ(key_ordered[PIVOT], i);
+#ifdef DEBUG
+	printf("dump split left node:\n");
+	dump_btree_node(node, 0);
+	printf("dump split right node:\n");
+	dump_btree_node(right, 0);
+#endif
+
+	/* (left) node has PIVOT entries */
+	ASSERT_EQ(PIVOT, node->used);
+
+	/* right node has the other half entries */
+	ASSERT_EQ(ORDER - PIVOT -1, right->used);
+	for (i = 0; i < right->used; i++) {
+		ASSERT_EQ(right->key[i], key_ordered[i + PIVOT + 1]);
+	}
+
+	test_pass_pop();
+}
+
 void get_idx_test()
 {
 	int index;
@@ -147,6 +193,7 @@ void node_internal_checks()
 	test_print("Running %s tests...\n", __func__);
 
 	insert_to_node();
+	split_node_check();
 	get_idx_test();
 	delete_from_node();
 
