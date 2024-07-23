@@ -181,10 +181,13 @@ void lookup_key()
 
 	build_tree(&tree, key, ARRAY_SIZE(key));
 
-	/* Find entry for key[0] */
-	data = btree_lookup(&tree, key[0]);
-	ASSERT_NE(NULL, data);
-	ASSERT_EQ(&key[0], data);
+	for (index = 0; index < ARRAY_SIZE(key); index++) {
+		/* Find entry for key[index] */
+		data = btree_lookup(&tree, key[index]);
+		ASSERT_NE(NULL, data);
+		ASSERT_EQ(&key[index], data);
+		ASSERT_EQ(key[index], *(int*)data);
+	}
 
 	/* Not expect to find non-exist key */
 	data = btree_lookup(&tree, 9999);
