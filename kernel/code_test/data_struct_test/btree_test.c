@@ -1,14 +1,51 @@
 #include <stdio.h>
 #include "btree.h"
 
+void insert_to_node() 
+{
+	int i, idx;
+	/* This test case needs a full inserted node */
+	int key[] = {22, 10, 33, 15, 45, 1};
+	int key_ordered[] = {1, 10, 15, 22, 33, 45};
+	struct btree_node *node = new_btree_node();
+	struct btree_node *right;
+	void *data;
+
+	PREFIX_PUSH();
+
+	if (!node)
+		return;
+
+	for (i = 0; i < ARRAY_SIZE(key); i++) {
+		idx_in_node(node, key[i], &idx);
+		btree_node_insert(node, idx, NULL, NULL, key[i], &key[i]);
+#ifdef DEBUG
+		printf("key: %d may at idx %d\n", key[i], idx);
+		dump_btree_node(node, 0);
+#endif
+	}
+
+	ASSERT_EQ(ARRAY_SIZE(key), node->used);
+	for (i = 0; i < node->used; i++) {
+		data = node->data[i];
+		ASSERT_EQ(key_ordered[i], *(int*)data);
+	}
+
+	right = split_node(node, &i, &data);
+#ifdef DEBUG
+	printf("dump split left node:\n");
+	dump_btree_node(node, 0);
+	printf("dump split right node:\n");
+	dump_btree_node(right, 0);
+#endif
+
+	test_pass_pop();
+}
+
 void get_idx_test()
 {
 	int index;
 	struct btree_node node;
-
-	prefix_reset();
-	prefix_push("get_idx_test");
-	test_print("Running %s tests...\n", __func__);
 
 	PREFIX_PUSH();
 
@@ -42,6 +79,68 @@ void get_idx_test()
 	ASSERT_EQ(index, 0);
 
 	test_pass_pop();
+}
+
+void delete_from_node()
+{
+	int i, idx;
+	int key[] = {22, 10, 33, 15};
+	int key_ordered[] = {10, 15, 22, 33};
+	struct btree_node *node = new_btree_node();
+	struct btree_node *right;
+	void *data;
+
+	PREFIX_PUSH();
+
+	if (!node)
+		return;
+
+	for (i = 0; i < ARRAY_SIZE(key); i++) {
+		idx_in_node(node, key[i], &idx);
+		btree_node_insert(node, idx, NULL, NULL, key[i], &key[i]);
+	}
+#ifdef DEBUG
+	printf("Now we have a node like: \n");
+	dump_btree_node(node, 0);
+#endif
+
+	/* There are total ARRAY_SIZE(key) entries in node */
+	ASSERT_EQ(ARRAY_SIZE(key), node->used);
+
+	data = btree_node_delete(node, 2, false);
+#ifdef DEBUG
+	printf("After deletion idx 2 : \n");
+	dump_btree_node(node, 0);
+#endif
+	ASSERT_EQ(ARRAY_SIZE(key) - 1, node->used);
+	ASSERT_EQ(key_ordered[2], *(int*)data);
+
+	data = btree_node_delete(node, 1, false);
+#ifdef DEBUG
+	printf("After deletion idx 1 : \n");
+	dump_btree_node(node, 0);
+#endif
+	ASSERT_EQ(ARRAY_SIZE(key) - 2, node->used);
+	ASSERT_EQ(key_ordered[1], *(int*)data);
+
+	btree_node_replace(node, 0, key[0], &key[0]);
+#ifdef DEBUG
+	printf("After replace idx 0 with %d: \n", key[0]);
+	dump_btree_node(node, 0);
+#endif
+
+	test_pass_pop();
+}
+
+void node_internal_checks()
+{
+	prefix_reset();
+	prefix_push("node_internal_checks");
+	test_print("Running %s tests...\n", __func__);
+
+	insert_to_node();
+	get_idx_test();
+	delete_from_node();
 
 	prefix_pop();
 }
@@ -63,10 +162,6 @@ void lookup_key()
 	int index;
 	void *data;
 
-	prefix_reset();
-	prefix_push("lookup_key");
-	test_print("Running %s tests...\n", __func__);
-
 	PREFIX_PUSH();
 
 	data = btree_lookup(&tree, key[0]);
@@ -85,55 +180,6 @@ void lookup_key()
 	ASSERT_EQ(NULL, data);
 
 	test_pass_pop();
-
-	prefix_pop();
-}
-
-void insert_to_node() 
-{
-	int i, idx;
-	/* This test case needs a full inserted node */
-	int key[] = {22, 10, 33, 15, 45, 1};
-	int key_ordered[] = {1, 10, 15, 22, 33, 45};
-	struct btree_node *node = new_btree_node();
-	struct btree_node *right;
-	void *data;
-
-	prefix_reset();
-	prefix_push("insert_to_node");
-	test_print("Running %s tests...\n", __func__);
-
-	PREFIX_PUSH();
-
-	if (!node)
-		return;
-
-	for (i = 0; i < ARRAY_SIZE(key); i++) {
-		idx_in_node(node, key[i], &idx);
-		btree_node_insert(node, idx, NULL, NULL, key[i], &key[i]);
-#ifdef DEBUG
-		printf("key: %d may at idx %d\n", key[i], idx);
-		dump_btree_node(node, 0);
-#endif
-	}
-
-	ASSERT_EQ(ARRAY_SIZE(key), node->used);
-	for (i = 0; i < node->used; i++) {
-		data = node->data[i];
-		ASSERT_EQ(key_ordered[i], *(int*)data);
-	}
-
-	right = split_node(node, &i, &data);
-#ifdef DEBUG
-	printf("dump split left node:\n");
-	dump_btree_node(node, 0);
-	printf("dump split right node:\n");
-	dump_btree_node(right, 0);
-#endif
-
-	test_pass_pop();
-
-	prefix_pop();
 }
 
 void insert_key()
@@ -146,10 +192,6 @@ void insert_key()
 		     50, 100, 101,
 		     110, 168, 198,
 		};
-
-	prefix_reset();
-	prefix_push("insert_key");
-	test_print("Running %s tests...\n", __func__);
 
 	PREFIX_PUSH();
 
@@ -169,8 +211,6 @@ void insert_key()
 	ASSERT_EQ(&tree, data);
 
 	test_pass_pop();
-
-	prefix_pop();
 }
 
 void iterate_btree()
@@ -178,10 +218,6 @@ void iterate_btree()
 	int i;
 	struct btree tree = BTREE;
 	BTREE_ITERATOR(biter, &tree);
-
-	prefix_reset();
-	prefix_push("iterate_btree");
-	test_print("Running %s tests...\n", __func__);
 
 	PREFIX_PUSH();
 
@@ -259,65 +295,6 @@ void iterate_btree()
 	}
 
 	test_pass_pop();
-
-	prefix_pop();
-}
-
-void delete_from_node()
-{
-	int i, idx;
-	int key[] = {22, 10, 33, 15};
-	int key_ordered[] = {10, 15, 22, 33};
-	struct btree_node *node = new_btree_node();
-	struct btree_node *right;
-	void *data;
-
-	prefix_reset();
-	prefix_push("delete_from_node");
-	test_print("Running %s tests...\n", __func__);
-
-	PREFIX_PUSH();
-
-	if (!node)
-		return;
-
-	for (i = 0; i < ARRAY_SIZE(key); i++) {
-		idx_in_node(node, key[i], &idx);
-		btree_node_insert(node, idx, NULL, NULL, key[i], &key[i]);
-	}
-#ifdef DEBUG
-	printf("Now we have a node like: \n");
-	dump_btree_node(node, 0);
-#endif
-
-	/* There are total ARRAY_SIZE(key) entries in node */
-	ASSERT_EQ(ARRAY_SIZE(key), node->used);
-
-	data = btree_node_delete(node, 2, false);
-#ifdef DEBUG
-	printf("After deletion idx 2 : \n");
-	dump_btree_node(node, 0);
-#endif
-	ASSERT_EQ(ARRAY_SIZE(key) - 1, node->used);
-	ASSERT_EQ(key_ordered[2], *(int*)data);
-
-	data = btree_node_delete(node, 1, false);
-#ifdef DEBUG
-	printf("After deletion idx 1 : \n");
-	dump_btree_node(node, 0);
-#endif
-	ASSERT_EQ(ARRAY_SIZE(key) - 2, node->used);
-	ASSERT_EQ(key_ordered[1], *(int*)data);
-
-	btree_node_replace(node, 0, key[0], &key[0]);
-#ifdef DEBUG
-	printf("After replace idx 0 with %d: \n", key[0]);
-	dump_btree_node(node, 0);
-#endif
-
-	test_pass_pop();
-
-	prefix_pop();
 }
 
 void delete_key_test()
@@ -332,10 +309,6 @@ void delete_key_test()
 		     50, 100, 101,
 		     110, 168, 198,
 		};
-
-	prefix_reset();
-	prefix_push("delete_key_test");
-	test_print("Running %s tests...\n", __func__);
 
 	PREFIX_PUSH();
 
@@ -391,20 +364,27 @@ void delete_key_test()
 		panic("still has root %p\n", tree.root);
 
 	test_pass_pop();
+}
+
+void whole_tree_checks()
+{
+	prefix_reset();
+	prefix_push("whole_tree_check");
+	test_print("Running %s tests...\n", __func__);
+
+	lookup_key();
+	insert_key();
+	iterate_btree();
+	delete_key_test();
 
 	prefix_pop();
+
 }
 
 int main(int argc, char *argv[])
 {
 	parse_args(argc, argv);
 
-	get_idx_test();
-	lookup_key();
-	insert_key();
-	insert_to_node();
-	iterate_btree();
-	delete_from_node();
-	delete_key_test();
-
+	node_internal_checks();
+	whole_tree_checks();
 }
