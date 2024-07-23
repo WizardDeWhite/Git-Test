@@ -175,6 +175,7 @@ void btree_insert(struct btree *tree, int key, void *data)
 				panic("failed to allocate new node\n");
 			tree->root = node;
 		}
+		// get the index where to put key/data
 		idx_in_node(node, key, &idx);
 	}
 }
@@ -200,19 +201,23 @@ struct btree_node *split_node(struct btree_node *node, int *key, void **data)
 		right->key[i] = node->key[j];
 		right->data[i] = node->data[j];
 		right->children[i] = node->children[j];
+		// adjust children's parent/parent_index in right
+		if (right->children[i]) {
+			right->children[i]->parent = right;
+			right->children[i]->parent_index = i;
+		}
 	}
+	// take the last child
 	right->children[i] = node->children[j];
+	if (right->children[i]) {
+		right->children[i]->parent = right;
+		right->children[i]->parent_index = i;
+	}
 
 	right->used = ORDER - PIVOT - 1;
 	right->parent = node->parent;
-
-	// adjust children's parent/parent_index in right
-	for (i = 0; i <= right->used; i++) {
-		if (right->children[i]) {
-			right->children[i]->parent_index = i;
-			right->children[i]->parent = right;
-		}
-	}
+	if (right->parent)
+		right->parent_index = node->parent->parent_index;
 
 	// clear right part in node
 	node->used = PIVOT;
