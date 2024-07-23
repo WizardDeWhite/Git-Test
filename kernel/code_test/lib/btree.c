@@ -378,7 +378,7 @@ void *btree_node_delete(struct btree_node *node, int idx, bool keep)
 void btree_node_replace(struct btree_node *node, int idx, int key, void *data)
 {
 	if (idx >= node->used)
-		panic("replace idx out of range\n");
+		panic("%s:%d: replace idx out of range\n", __FILE__, __LINE__);
 
 	node->key[idx] = key;
 	node->data[idx] = data;
