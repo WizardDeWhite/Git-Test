@@ -111,14 +111,15 @@ bool btree_node_insert(struct btree_node *node, int idx,
 		panic("node overflow\n");
 	// shift right from idx
 	for (i = node->used - 1; i >= idx; i--) {
+		// shift key and data
 		node->key[i+1] = node->key[i];
 		node->data[i+1] = node->data[i];
-	}
-	for (i = node->used; i > idx; i--) {
-		// shift parent_index too
-		if (node->children[i])
-			node->children[i]->parent_index++;
-		node->children[i+1] = node->children[i];
+
+		// shift children
+		node->children[i+2] = node->children[i+1];
+		// shift children's parent_index too
+		if (node->children[i+2])
+			node->children[i+2]->parent_index++;
 	}
 	node->key[idx] = key;
 	node->data[idx] = data;
