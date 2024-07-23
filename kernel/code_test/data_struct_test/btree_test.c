@@ -32,6 +32,8 @@ void insert_to_node()
 	}
 
 	right = split_node(node, &i, &data);
+	/* PIVOT is split as a stand alone entry */
+	ASSERT_EQ(key_ordered[PIVOT], i);
 #ifdef DEBUG
 	printf("dump split left node:\n");
 	dump_btree_node(node, 0);
@@ -95,8 +97,7 @@ void delete_from_node()
 
 	PREFIX_PUSH();
 
-	if (!node)
-		return;
+	ASSERT_NE(NULL, node);
 
 	for (i = 0; i < ARRAY_SIZE(key); i++) {
 		idx_in_node(node, key[i], &idx);
@@ -109,6 +110,10 @@ void delete_from_node()
 
 	/* There are total ARRAY_SIZE(key) entries in node */
 	ASSERT_EQ(ARRAY_SIZE(key), node->used);
+	for (i = 0; i < node->used; i++) {
+		data = node->data[i];
+		ASSERT_EQ(key_ordered[i], *(int*)data);
+	}
 
 	data = btree_node_delete(node, 2, false);
 #ifdef DEBUG
