@@ -77,6 +77,9 @@ void get_idx_test()
 	/* No entry with key 1, expect to insert at 0 */
 	ASSERT_FALSE(idx_in_node(&node, 1, &index));
 	ASSERT_EQ(index, 0);
+	/* No entry with key 58, expect to insert at 4 */
+	ASSERT_FALSE(idx_in_node(&node, 58, &index));
+	ASSERT_EQ(index, 4);
 
 	test_pass_pop();
 }
