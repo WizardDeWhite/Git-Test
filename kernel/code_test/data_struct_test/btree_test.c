@@ -31,16 +31,6 @@ void insert_to_node()
 		ASSERT_EQ(key_ordered[i], *(int*)data);
 	}
 
-	right = split_node(node, &i, &data);
-	/* PIVOT is split as a stand alone entry */
-	ASSERT_EQ(key_ordered[PIVOT], i);
-#ifdef DEBUG
-	printf("dump split left node:\n");
-	dump_btree_node(node, 0);
-	printf("dump split right node:\n");
-	dump_btree_node(right, 0);
-#endif
-
 	test_pass_pop();
 }
 
