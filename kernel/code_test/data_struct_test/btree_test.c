@@ -119,6 +119,13 @@ void get_idx_test()
 	ASSERT_FALSE(idx_in_node(&node, 58, &index));
 	ASSERT_EQ(index, 4);
 
+	/*
+	 * corner case: since we don't clean data after split,
+	 * if node.key[node.used] == key, we would thought it is found
+	 */
+	node.key[4] = 58;    // node.used is still 4
+	ASSERT_FALSE(idx_in_node(&node, 58, &index));
+
 	test_pass_pop();
 }
 
