@@ -64,7 +64,8 @@ struct btree_iterator {
 		.node = BTREE_START,		\
 	}
 
-#define BTREE_ITERATOR_INIT(name)		\
+#define BTREE_ITERATOR_INIT(name, btree)	\
+		name.tree = btree;		\
 		name.node = BTREE_START;
 
 bool idx_in_node(struct btree_node *node, int key, int *index);

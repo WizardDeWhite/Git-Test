@@ -300,14 +300,14 @@ void iterate_btree()
 	build_tree(&tree, key1, ARRAY_SIZE(key1));
 
 	/* After insertion, the first entry points to it */
-	BTREE_ITERATOR_INIT(biter);
+	BTREE_ITERATOR_INIT(biter, &tree);
 	btree_first(&biter);
 	ASSERT_NE(NULL, biter.node);
 	ASSERT_EQ(biter.node->key[biter.idx], key1[0]);
 	ASSERT_EQ(biter.node->data[biter.idx], &key1[0]);
 
 	/* Since there is only one entry, the last entry points to it too */
-	BTREE_ITERATOR_INIT(biter);
+	BTREE_ITERATOR_INIT(biter, &tree);
 	btree_last(&biter);
 	ASSERT_NE(NULL, biter.node);
 	ASSERT_EQ(biter.node->key[biter.idx], key1[0]);
@@ -328,18 +328,18 @@ void iterate_btree()
 	build_tree(&tree, key, ARRAY_SIZE(key));
 
 	/* The new tree's smallest entry is 7 */
-	BTREE_ITERATOR_INIT(biter);
+	BTREE_ITERATOR_INIT(biter, &tree);
 	btree_first(&biter);
 	ASSERT_NE(NULL, biter.node);
 	ASSERT_EQ(biter.node->key[biter.idx], key_ordered[0]);
 
 	/* The new tree's largest entry is 1056 */
-	BTREE_ITERATOR_INIT(biter);
+	BTREE_ITERATOR_INIT(biter, &tree);
 	btree_last(&biter);
 	ASSERT_NE(NULL, biter.node);
 	ASSERT_EQ(biter.node->key[biter.idx], key_ordered[ARRAY_SIZE(key_ordered) - 1]);
 
-	BTREE_ITERATOR_INIT(biter);
+	BTREE_ITERATOR_INIT(biter, &tree);
 	i = 0;
 	while (btree_next(&biter)) {
 		ASSERT_NE(NULL, biter.node);
@@ -348,14 +348,14 @@ void iterate_btree()
 	}
 
 	i--;
-	BTREE_ITERATOR_INIT(biter);
+	BTREE_ITERATOR_INIT(biter, &tree);
 	while (btree_prev(&biter)) {
 		ASSERT_NE(NULL, biter.node);
 		ASSERT_EQ(biter.node->key[biter.idx], key_ordered[i]);
 		i--;
 	}
 
-	BTREE_ITERATOR_INIT(biter);
+	BTREE_ITERATOR_INIT(biter, &tree);
 	i = 0;
 	for_each_btree(&biter) {
 		ASSERT_NE(NULL, biter.node);
@@ -442,8 +442,8 @@ void whole_tree_checks()
 	test_print("Running %s tests...\n", __func__);
 
 	lookup_key();
-	insert_key();
 	iterate_btree();
+	insert_key();
 	delete_key_test();
 
 	prefix_pop();
