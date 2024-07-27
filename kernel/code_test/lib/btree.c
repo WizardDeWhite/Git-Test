@@ -237,9 +237,6 @@ struct btree_node *split_node(struct btree_node *node, int *key, void **data)
 	}
 
 	right->used = ORDER - PIVOT - 1;
-	right->parent = node->parent;
-	if (right->parent)
-		right->parent_index = node->parent->parent_index;
 
 	// clear right part in node
 	node->used = PIVOT;
