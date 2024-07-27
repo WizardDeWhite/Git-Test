@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include "btree.h"
 
 void insert_to_node() 
@@ -8,7 +9,7 @@ void insert_to_node()
 	int key[] = {22, 10, 33, 15, 45, 1};
 	int key_ordered[] = {1, 10, 15, 22, 33, 45};
 	struct btree_node *node = new_btree_node();
-	struct btree_node *right;
+	struct btree_node children[ORDER+1];
 	void *data;
 
 	PREFIX_PUSH();
@@ -16,9 +17,19 @@ void insert_to_node()
 	if (!node)
 		return;
 
+	// reset children
+	for (i = 0; i < ARRAY_SIZE(children); i++) {
+		memset(&children[i], 0, sizeof(struct btree_node));
+	}
+
 	for (i = 0; i < ARRAY_SIZE(key); i++) {
+		struct btree_node *left = NULL, *right = NULL;
+
 		idx_in_node(node, key[i], &idx);
-		btree_node_insert(node, idx, NULL, NULL, key[i], &key[i]);
+		if (i == 0)
+			left = &children[0];
+		right = &children[ORDER - i];
+		btree_node_insert(node, idx, left, right, key[i], &key[i]);
 #ifdef DEBUG
 		printf("key: %d may at idx %d\n", key[i], idx);
 		dump_btree_node(node, 0);
