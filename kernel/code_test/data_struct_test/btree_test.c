@@ -189,9 +189,9 @@ void node_internal_checks()
 	prefix_push("node_internal_checks");
 	test_print("Running %s tests...\n", __func__);
 
+	get_idx_test();
 	insert_to_node();
 	split_node_check();
-	get_idx_test();
 	delete_from_node();
 
 	prefix_pop();

@@ -100,6 +100,26 @@ void dump_btree(struct btree *tree)
 #endif
 }
 
+/*
+ *               idx
+ *      +---+    +---+
+ *      | a |    | b |
+ *      +---+    +---+
+ *   |        |        |
+ *   c0       c1       c2
+ *
+ *
+ * We shift idx right, but leave the original left child there.
+ * And the new left child is replaced with a new one.
+ *
+ *      +---+    +---+    +---+
+ *      | a |    | n |    | b |
+ *      +---+    +---+    +---+
+ *   |        |        |        |
+ *   c0       c1       c'       c2
+ *
+ *
+ */
 // insert key at [idx]
 // return false means everything is fine, true means needs split
 bool btree_node_insert(struct btree_node *node, int idx,
@@ -115,7 +135,7 @@ bool btree_node_insert(struct btree_node *node, int idx,
 		node->key[i+1] = node->key[i];
 		node->data[i+1] = node->data[i];
 
-		// shift children
+		// shift right child
 		node->children[i+2] = node->children[i+1];
 		// shift children's parent_index too
 		if (node->children[i+2])
