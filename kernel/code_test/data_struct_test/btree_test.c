@@ -253,6 +253,7 @@ void lookup_key()
 
 void insert_key()
 {
+	int i;
 	void *data;
 	struct btree tree = BTREE;
 	int key[] = {22, 33, 10, 15, 16,
@@ -266,9 +267,10 @@ void insert_key()
 
 	build_tree(&tree, key, ARRAY_SIZE(key));
 
-	data = btree_lookup(&tree, key[0]);
-	ASSERT_NE(NULL, data);
-	ASSERT_EQ(&key[0], data);
+	for (i = 0; i < ARRAY_SIZE(key); i++) {
+		data = btree_lookup(&tree, key[i]);
+		ASSERT_EQ(&key[i], data);
+	}
 
 	// update the key
 	btree_insert(&tree, key[0], &tree);
