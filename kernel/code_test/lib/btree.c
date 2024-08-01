@@ -466,19 +466,19 @@ void *btree_delete(struct btree *tree, int key)
 
 		// case 3.a
 		if (!is_low(sibling)) {
-			rotate(parent, node->parent_index);
+			btree_rotate(parent, node->parent_index);
 			break;
 		}
 
 		// case 3.b
-		merge(parent, node->parent_index);
+		btree_merge(parent, node->parent_index);
 		node = parent;
 	}
 
 	return data;
 }
 
-void rotate(struct btree_node *node, int idx)
+void btree_rotate(struct btree_node *node, int idx)
 {
       struct btree_node *left, *right;
 
@@ -496,7 +496,7 @@ void rotate(struct btree_node *node, int idx)
       btree_node_delete(right, 0, false);
 }
 
-void merge(struct btree_node *node, int idx)
+void btree_merge(struct btree_node *node, int idx)
 {
 	struct btree_node *left, *right;
 	int i;
