@@ -186,7 +186,7 @@ void btree_insert(struct btree *tree, int key, void *data)
 	while (btree_node_insert(node, idx, left, right, key, data)) {
 		// node is full, let's split it
 		right = split_node(node, &key, &data);
-		left = node;
+		left = node->parent ? NULL : node ;
 		// insert the split key to parent
 		node = node->parent;
 		if (!node) {
