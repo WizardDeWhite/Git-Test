@@ -1,0 +1,9 @@
+git clone https://github.com/intel/lkp-tests.git ~/git/lkp-tests
+git remote add akpm-mm https://git.kernel.org/pub/scm/linux/kernel/git/akpm/mm.git
+git fetch akpm-mm mm-everything
+git checkout akpm-mm/mm-everything
+b4 shazam https://lore.kernel.org/r/20240506012104.10864-1-richard.weiyang@gmail.com
+# save the config file
+mkdir build_dir && cp config build_dir/.config
+COMPILER_INSTALL_PATH=$HOME/0day COMPILER=gcc-13.2.0 ~/git/lkp-tests/kbuild/make.cross W=1 O=build_dir ARCH=powerpc olddefconfig
+COMPILER_INSTALL_PATH=$HOME/0day COMPILER=gcc-13.2.0 ~/git/lkp-tests/kbuild/make.cross W=1 O=build_dir ARCH=powerpc SHELL=/bin/bash
