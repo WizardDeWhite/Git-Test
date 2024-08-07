@@ -23,13 +23,8 @@ void insert_to_node()
 	}
 
 	for (i = 0; i < ARRAY_SIZE(key); i++) {
-		struct btree_node *left = NULL, *right = NULL;
-
 		idx_in_node(node, key[i], &idx);
-		if (i == 0)
-			left = &children[0];
-		right = &children[ORDER - i];
-		btree_node_insert(node, idx, left, right, key[i], &key[i]);
+		btree_node_insert(node, idx, NULL, NULL, key[i], &key[i]);
 #ifdef DEBUG
 		printf("key: %d may at idx %d\n", key[i], idx);
 		dump_btree_node(node, 0);
