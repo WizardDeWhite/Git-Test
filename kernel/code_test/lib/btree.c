@@ -617,11 +617,11 @@ void btree_rotate(struct btree_node *node, int idx)
  *                      /             \
  *                  /                     \
  *              /                             \
- *       +---+ +---+                       +---+ +---+
- *       | X | | Y |                       | J | | K |
- *       +---+ +---+                       +---+ +---+
- *      |     |     |                     |     |     |
- *      c10   c11   c12                   c20   c21   c22
+ *       +---+                             +---+ +---+
+ *       | X |                             | J | | K |
+ *       +---+                             +---+ +---+
+ *      |     |                           |     |     |
+ *      c10   c11                         c20   c21   c22
  *
  *
  * After merge
@@ -636,11 +636,11 @@ void btree_rotate(struct btree_node *node, int idx)
  *                      /
  *                  /
  *              /
- *       +---+ +---+ +---+ +---+ +---+
- *       | X | | Y | | B | | J | | K |
- *       +---+ +---+ +---+ +---+ +---+
- *      |     |     |     |     |     |
- *      c10   c11   c12   c20   c21   c22
+ *       +---+ +---+ +---+ +---+
+ *       | X | | B | | J | | K |
+ *       +---+ +---+ +---+ +---+
+ *      |     |     |     |     |
+ *      c10   c11   c20   c21   c22
  *
  */
 void btree_merge(struct btree_node *node, int idx)
