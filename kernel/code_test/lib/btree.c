@@ -227,6 +227,45 @@ void btree_insert(struct btree *tree, int key, void *data)
 	}
 }
 
+/*
+ * split node and insert extra element into parent
+ *
+ *                           idx
+ *                     +---+ +---+
+ *                     | A | | C |
+ *                     +---+ +---+
+ *                    |     |     |
+ *                    c0    c1    c2
+ *                          /
+ *                      /
+ *                  /
+ *              /
+ *       +---+ +---+ +---+ +---+ +---+
+ *       | X | | Y | | B | | J | | K |
+ *       +---+ +---+ +---+ +---+ +---+
+ *      |     |     |     |     |     |
+ *      c10   c11   c12   c20   c21   c22
+ *
+ *
+ * After split
+ *
+ *                           idx
+ *                     +---+ +---+ +---+
+ *                     | A | | B | | C |
+ *                     +---+ +---+ +---+
+ *                    |     |     |     |
+ *                    c0    c1    c'    c2
+ *                          /     \
+ *                      /             \
+ *                  /                     \
+ *              /                             \
+ *       +---+ +---+                       +---+ +---+
+ *       | X | | Y |                       | J | | K |
+ *       +---+ +---+                       +---+ +---+
+ *      |     |     |                     |     |     |
+ *      c10   c11   c12                   c20   c21   c22
+ *
+ */
 struct btree_node *split_node(struct btree_node *node, int *key, void **data)
 {
 	struct btree_node *right;
