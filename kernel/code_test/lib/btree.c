@@ -400,6 +400,7 @@ void *btree_node_delete(struct btree_node *node, int idx, bool keep)
 	return data;
 }
 
+/* replace node[idx] with key/data */
 void btree_node_replace(struct btree_node *node, int idx, int key, void *data)
 {
 	if (idx >= node->used)
@@ -442,6 +443,7 @@ void *btree_delete(struct btree *tree, int key)
 		index = biter.idx;
 	}
 
+	// remove from leaf node
 	btree_node_delete(node, index, false);
 
 	while (is_low(node)) {
@@ -478,6 +480,48 @@ void *btree_delete(struct btree *tree, int key)
 	return data;
 }
 
+/*
+ * Rotate from right to left.
+ *
+ * append node[idx] to left child and move right child's first element to parent
+ *
+ *                           idx
+ *                     +---+ +---+ +---+
+ *                     | A | | B | | C |
+ *                     +---+ +---+ +---+
+ *                    |     |     |     |
+ *                    c0    c1    c2    c3
+ *                          /     \
+ *                      /             \
+ *                  /                     \
+ *              /                             \
+ *       +---+ +---+                       +---+ +---+ +---+ +---+
+ *       | X | | Y |                       | J | | K | | L | | M |
+ *       +---+ +---+                       +---+ +---+ +---+ +---+
+ *      |     |     |                     |     |     |     |     |
+ *      c10   c11   c12                   c20   c21   c22   c23   c24
+ *
+ *
+ *
+ * After rotate:
+ *
+ *                           idx
+ *                     +---+ +---+ +---+
+ *                     | A | | J | | C |
+ *                     +---+ +---+ +---+
+ *                    |     |     |     |
+ *                    c0    c1    c2    c3
+ *                          /     \
+ *                      /             \
+ *                  /                     \
+ *              /                             \
+ *       +---+ +---+ +---+                 +---+ +---+ +---+
+ *       | X | | Y | | B |                 | K | | L | | M |
+ *       +---+ +---+ +---+                 +---+ +---+ +---+
+ *      |     |     |     |               |     |     |     |
+ *      c10   c11   c12   c20             c21   c22   c23   c24
+ *
+ */
 void btree_rotate(struct btree_node *node, int idx)
 {
       struct btree_node *left, *right;
@@ -485,7 +529,7 @@ void btree_rotate(struct btree_node *node, int idx)
       left = node->children[idx];
       right = node->children[idx+1];
 
-      // insert idx to left
+      // append node[idx] to left, also with right's first child
       btree_node_insert(left, left->used, NULL, right->children[0],
                       node->key[idx], node->data[idx]);
 
@@ -496,6 +540,45 @@ void btree_rotate(struct btree_node *node, int idx)
       btree_node_delete(right, 0, false);
 }
 
+/*
+ * merge node[idx] and it's left/right child to left
+ *
+ *                           idx
+ *                     +---+ +---+ +---+
+ *                     | A | | B | | C |
+ *                     +---+ +---+ +---+
+ *                    |     |     |     |
+ *                    c0    c1    c2    c3
+ *                          /     \
+ *                      /             \
+ *                  /                     \
+ *              /                             \
+ *       +---+ +---+                       +---+ +---+
+ *       | X | | Y |                       | J | | K |
+ *       +---+ +---+                       +---+ +---+
+ *      |     |     |                     |     |     |
+ *      c10   c11   c12                   c20   c21   c22
+ *
+ *
+ * After merge
+ *
+ *                           idx
+ *                     +---+ +---+
+ *                     | A | | C |
+ *                     +---+ +---+
+ *                    |     |     |
+ *                    c0    c1    c3
+ *                          /
+ *                      /
+ *                  /
+ *              /
+ *       +---+ +---+ +---+ +---+ +---+
+ *       | X | | Y | | B | | J | | K |
+ *       +---+ +---+ +---+ +---+ +---+
+ *      |     |     |     |     |     |
+ *      c10   c11   c12   c20   c21   c22
+ *
+ */
 void btree_merge(struct btree_node *node, int idx)
 {
 	struct btree_node *left, *right;
@@ -504,12 +587,12 @@ void btree_merge(struct btree_node *node, int idx)
 	left = node->children[idx];
 	right = node->children[idx+1];
 
-	// move idx to left
+	// append node[idx] to left
 	btree_node_insert(left, left->used, NULL, NULL,
 			node->key[idx], node->data[idx]);
 	btree_node_delete(node, idx, true);
 
-	// move right to left
+	// append right to left
 	for (i = 0; i < right->used; i++) {
 		btree_node_insert(left, left->used,
 				right->children[i], right->children[i+1],
