@@ -103,6 +103,33 @@ void dump_btree(struct btree *tree)
 }
 
 /*
+ * Special case for insertion the first element of node.
+ */
+void __btree_node_insert_first(struct btree_node *node,
+		struct btree_node *left, struct btree_node *right,
+		int key, void *data)
+{
+	if (node->used != 0)
+		panic("insert first element to non-empty node\n");
+
+	node->key[0] = key;
+	node->data[0] = data;
+	node->used = 1;
+
+	if (left) {
+		node->children[0] = left;
+		left->parent = node;
+		left->parent_index = 0;
+	}
+
+	if (right) {
+		node->children[1] = right;
+		right->parent = node;
+		right->parent_index = 1;
+	}
+}
+
+/*
  *            idx
  *      +---+ +---+
  *      | a | | b |
@@ -112,7 +139,6 @@ void dump_btree(struct btree *tree)
  *
  *
  * We shift idx right, but leave the original left child there.
- * And the new left child is replaced with a new one.
  *
  *            idx
  *      +---+ +---+ +---+
@@ -197,6 +223,9 @@ void btree_insert(struct btree *tree, int key, void *data)
 			if (!node)
 				panic("failed to allocate new node\n");
 			tree->root = node;
+
+			__btree_node_insert_first(node, left, right, key, data);
+			return;
 		}
 		// get the index where to put key/data
 		idx_in_node(node, key, &idx);
