@@ -103,22 +103,23 @@ void dump_btree(struct btree *tree)
 }
 
 /*
- *               idx
- *      +---+    +---+
- *      | a |    | b |
- *      +---+    +---+
- *   |        |        |
- *   c0       c1       c2
+ *            idx
+ *      +---+ +---+
+ *      | a | | b |
+ *      +---+ +---+
+ *     |     |     |
+ *     c0    c1    c2
  *
  *
  * We shift idx right, but leave the original left child there.
  * And the new left child is replaced with a new one.
  *
- *      +---+    +---+    +---+
- *      | a |    | n |    | b |
- *      +---+    +---+    +---+
- *   |        |        |        |
- *   c0       c1       c'       c2
+ *            idx
+ *      +---+ +---+ +---+
+ *      | a | | n | | b |
+ *      +---+ +---+ +---+
+ *     |     |     |     |
+ *     c0    c1    c'    c2
  *
  *
  */
