@@ -152,7 +152,7 @@ void __btree_node_insert_first(struct btree_node *node,
 // insert key at [idx]
 // return false means everything is fine, true means needs split
 bool btree_node_insert(struct btree_node *node, int idx,
-		struct btree_node *left, struct btree_node *right,
+		struct btree_node *right,
 		int key, void *data)
 {
 	int i;
@@ -174,11 +174,6 @@ bool btree_node_insert(struct btree_node *node, int idx,
 	node->data[idx] = data;
 
 	// based on current split_node operation, left child is not changed
-	if (left /* && !node->children[idx] */) {
-		node->children[idx] = left;
-		left->parent = node;
-		left->parent_index = idx;
-	}
 	if (right) {
 		node->children[idx+1] = right;
 		right->parent = node;
@@ -210,7 +205,7 @@ void btree_insert(struct btree *tree, int key, void *data)
 	} while (node->children[idx] && (node = node->children[idx]));
 
 	//printf("not found key %d, try to insert to %p\n", key, node);
-	while (btree_node_insert(node, idx, left, right, key, data)) {
+	while (btree_node_insert(node, idx, right, key, data)) {
 		// node is full, let's split it
 		right = split_node(node, &key, &data);
 		left = node->parent ? NULL : node ;
@@ -560,7 +555,7 @@ void btree_rotate(struct btree_node *node, int idx)
       right = node->children[idx+1];
 
       // append node[idx] to left, also with right's first child
-      btree_node_insert(left, left->used, NULL, right->children[0],
+      btree_node_insert(left, left->used, right->children[0],
                       node->key[idx], node->data[idx]);
 
       // replace idx with right[0]
@@ -618,14 +613,14 @@ void btree_merge(struct btree_node *node, int idx)
 	right = node->children[idx+1];
 
 	// append node[idx] to left
-	btree_node_insert(left, left->used, NULL, right->children[0],
+	btree_node_insert(left, left->used, right->children[0],
 			node->key[idx], node->data[idx]);
 	btree_node_delete(node, idx, true);
 
 	// append right to left
 	for (i = 0; i < right->used; i++) {
 		btree_node_insert(left, left->used,
-				NULL, right->children[i+1],
+				right->children[i+1],
 				right->key[i], right->data[i]);
 	}
 

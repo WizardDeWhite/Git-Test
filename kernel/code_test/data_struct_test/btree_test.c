@@ -24,7 +24,7 @@ void insert_to_node()
 
 	for (i = 0; i < ARRAY_SIZE(key); i++) {
 		idx_in_node(node, key[i], &idx);
-		btree_node_insert(node, idx, NULL, NULL, key[i], &key[i]);
+		btree_node_insert(node, idx, NULL, key[i], &key[i]);
 #ifdef DEBUG
 		printf("key: %d may at idx %d\n", key[i], idx);
 		dump_btree_node(node, 0);
@@ -57,7 +57,7 @@ void split_node_check()
 
 	for (i = 0; i < ARRAY_SIZE(key); i++) {
 		idx_in_node(node, key[i], &idx);
-		btree_node_insert(node, idx, NULL, NULL, key[i], &key[i]);
+		btree_node_insert(node, idx, NULL, key[i], &key[i]);
 #ifdef DEBUG
 		printf("key: %d may at idx %d\n", key[i], idx);
 		dump_btree_node(node, 0);
@@ -150,7 +150,7 @@ void delete_from_node()
 
 	for (i = 0; i < ARRAY_SIZE(key); i++) {
 		idx_in_node(node, key[i], &idx);
-		btree_node_insert(node, idx, NULL, NULL, key[i], &key[i]);
+		btree_node_insert(node, idx, NULL, key[i], &key[i]);
 	}
 #ifdef DEBUG
 	printf("Now we have a node like: \n");
