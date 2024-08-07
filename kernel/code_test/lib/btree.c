@@ -588,14 +588,14 @@ void btree_merge(struct btree_node *node, int idx)
 	right = node->children[idx+1];
 
 	// append node[idx] to left
-	btree_node_insert(left, left->used, NULL, NULL,
+	btree_node_insert(left, left->used, NULL, right->children[0],
 			node->key[idx], node->data[idx]);
 	btree_node_delete(node, idx, true);
 
 	// append right to left
 	for (i = 0; i < right->used; i++) {
 		btree_node_insert(left, left->used,
-				right->children[i], right->children[i+1],
+				NULL, right->children[i+1],
 				right->key[i], right->data[i]);
 	}
 
