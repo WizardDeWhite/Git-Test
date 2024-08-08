@@ -1,21 +1,40 @@
-1. Normal API
-================================================================================
-1.1. mt_init()
+1. Normal API, Can't store reserved value.
 ================================================================================
 
-1.2. mtree_store(mt, index, entry, gfp)/mtree_store_range()
+1.1. DEFINE_MTREE() / mt_init()
 ================================================================================
 
-1.3. mtree_load()
+1.2. mtree_store()/mtree_store_range(), would overwrite if exist
+================================================================================
+
+1.3. mtree_insert(), not overwrite if already exist
+================================================================================
+1.3.1 mas_insert()
+================================================================================
+1.3.1.1 mas_start()
+================================================================================
+1.3.1.2 mas_store_root(mas, entry)
+================================================================================
+1.3.1.2.1 mas_root_expand()
+================================================================================
+1.3.1.3 mas_wr_walk() 
+================================================================================
+1.3.1.4 mas_wr_modify()
 ================================================================================
 
 1.4. mtree_erase()
 ================================================================================
 
-1.5. mtree_insert()
+1.5. mtree_load()
 ================================================================================
 
-2. Advanced 
+1.6. mt_find()
+================================================================================
+
+1.5. mt_for_each()
+================================================================================
+
+2. Advanced, Reserved value can be stored.
 ================================================================================
 
 2.1
@@ -38,6 +57,7 @@ Date:   Tue Sep 6 19:48:39 2022 +0000
     Patch series "Introducing the Maple Tree"
 
 Document: Documentation/core-api/maple_tree.rst
+Blog: https://blogs.oracle.com/linux/the-maple-tree
 
 0.0 B-Tree
 ================================================================================
@@ -66,6 +86,11 @@ Document: Documentation/core-api/maple_tree.rst
 
 0.1 maple_tree
 ================================================================================
+Currently there are two types of tree:
+
+  * normal tree
+  * allocation tree, allow user to search for a gap
+
 
     maple_tree
     +--------------------------------------------+
@@ -78,18 +103,42 @@ Document: Documentation/core-api/maple_tree.rst
     |    (void *)                                |
     +--------------------------------------------+
 
-0.1.1 enum maple_type
+0.1.1 ma_flags, with height encoded
 ================================================================================
-	maple_dense,
-	maple_leaf_64,
-	maple_range_64,
-	maple_arange_64,
 
-mte_node_type() 由entry的bit 2-3决定
+                              6            1  0
+ +----------------------------+------------+--+--+
+ |                            |            |  |  |
+ +----------------------------+------------+--+--+
+
+ bit 1-6 for height, max 2^5-1 = 31
 
 0.2 maple_node
 ================================================================================
 
+xarray operation:
+  xa_is_internal(): entry & 3 == 2
+  xa_mk_internal(): (v << 2) | 2 
+  xa_to_internal(): v >> 2
+
+  mt_is_reserved(): is_internal() && (v < 4096)
+
+  xa_is_node(): is_internal() && (v > 4096)
+  xa_mk_node(): v | 2
+  xa_to_node(): v - 2
+
+  xa_is_value(): (v & 1)
+  xa_mk_value(): (v << 1) | 1
+  xa_to_value(): v >> 1
+
+maple tree operation:
+  mt_mk_node(): encode maple_type, node | (type << MAPLE_ENODE_TYPE_SHIFT),
+	        but bit 1 is 0
+  mte_to_node(): clear low 8 bits, entry & ~MAPLE_NODE_MASK
+
+  mte_mk_root(): make an enode to root node, by set bit 1
+  mte_safe_root(): convert root node to enode, by clearing bit 1
+  
     maple_node (1 + 31) * 8 = 256 byte
     +--------------------------------------------+
     |parent                                      |
@@ -122,10 +171,23 @@ mte_node_type() 由entry的bit 2-3决定
     |    (unsigned int)                          |
     +--------------------------------------------+
 
+0.2.0 enum maple_type
+================================================================================
+	maple_dense,
+	maple_leaf_64,
+	maple_range_64,
+	maple_arange_64,
+
+mte_node_type() 由entry的bit 3-6决定. see comment of maple_range_64 and MAPLE_PARENT_ROOT.
+有一个前提条件：Non-leaf node大小是256B对齐的，所以低8位可以利用。
+
+0.2.0.1 mt_slots[]/mt_pivots[]/mt_min_slots[]
+================================================================================
+
 0.2.1 maple_pnode, a pseudo struct only used as pointer
 ================================================================================
 
-0.2.2 maple_enode, a pseudo struct only used as ponter
+0.2.2 maple_enode, maple encoded node
 ================================================================================
 
 0.2.3 maple_range_64
@@ -141,6 +203,35 @@ mte_node_type() 由entry的bit 2-3决定
     |                                            |
     |                                            |
     +--------------------------------------------+
+
+0.2.3.1 slot/pivot represent
+================================================================================
+
+ S: slot
+ P: pivot
+
+
+ +------+......+------+......+------+
+ |  S0  |  P0  |  S1  |  P1  |  S2  |
+ +------+......+------+......+------+
+
+ [min, P0]     [P0+1, P1]    [P1+1, max]
+
+
+ +------+......+------+......+------+......+------+......+------+
+ |  S0  |  P0  |  S1  |  P1  |  S2  |  P2  |  S3  |  P3  |  S4  |
+ +------+......+------+......+------+......+------+......+------+
+
+
+                   ^                           ^
+                   |                           |
+		 offset                    offset_end
+
+  means:
+
+  P0+1 <= mas->index <= P1
+  P2+1 <= mas->last  <= P3
+
 
 0.2.4 maple_arange_64
 ================================================================================
@@ -180,53 +271,71 @@ mte_node_type() 由entry的bit 2-3决定
 
 0.3 ma_state
 ================================================================================
+Define: MA_STATE()
+Set up: mas_start() when mas->status == mas_start
 
     ma_state
     +--------------------------------------------+
-    |tree                                        |
+    |tree                                        | set to tree
     |    (struct maple_tree*)                    |
-    |index                                       |
+    |index                                       | specify range [index, last]
     |last                                        |
     |    (unsigned long)                         |
-    |node                                        |
+    |node                                        | encoded node in interest
     |    (struct maple_enode*)                   |
-    |min                                         |
-    |max                                         |
-    |    (unsigned long)                         |
+    |min                                         | default [0, ULONG_MAX]
+    |max                                         | [r_min, r_max] during mas_wr_walk_traverse
+    |    (unsigned long)                         | which is the range of mas->node
     |alloc                                       |
     |    (struct maple_alloc*)                   |
-    |status                                      |
+    |status                                      | default ma_start
     |    (enum maple_status)                     |
     |depth                                       |
-    |offset                                      |
+    |offset                                      | in slot/pivot
     |mas_flags                                   |
-    |end                                         |
+    |end                                         | the end of data in node, get from ma_data_end()
     |    (unsigned char)                         |
     |                                            |
     +--------------------------------------------+
 
 0.4 ma_wr_state
 ================================================================================
+Define: MA_WR_STATE()
 
     ma_wr_state
     +--------------------------------------------+
     |mas                                         |
     |    (struct ma_state*)                      |
-    |node                                        |
+    |node                                        | decoded mas->node
     |    (struct maple_node*)                    |
-    |r_min/r_max                                 |
-    |    (unsigned long)                         |
-    |type                                        |
+    |type                                        | mas->node's type
     |    (enum maple_type)                       |
-    |offset_end                                  |
-    |    (unsigned char)                         |
-    |pivots                                      |
+    |pivots                                      | mas->node->pivots
     |    (unsigned long*)                        |
-    |end_piv                                     |
+    |slots                                       | mas->node->slots
+    |    (void *)                                |
+    |r_min/r_max                                 | range min/max at offset_end
+    |    (unsigned long)                         |
+    |offset_end                                  | the offset where mas->last
+    |    (unsigned char)                         |
+    |end_piv                                     | pivots[offset_end], set in mas_wr_end_piv()
     |    (unsigned long)                         |
     |                                            |
-    |entry                                       |
-    |content                                     |
+    |entry                                       | the new entry to be stored
+    |content                                     | existing entry to be overwritten
     |    (void*)                                 |
     |                                            |
     +--------------------------------------------+
+
+0.5 maple_status
+================================================================================
+
+	ma_active
+	ma_start
+	ma_root
+	ma_none
+	ma_pause
+	ma_overflow
+	ma_underflow
+	ma_error
+
