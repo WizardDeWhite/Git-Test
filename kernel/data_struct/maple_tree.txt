@@ -193,8 +193,32 @@ mte_node_type() 由entry的bit 3-6决定. see comment of maple_range_64 and MAPL
 0.2.1 maple_pnode, a pseudo struct only used as pointer
 ================================================================================
 
+因为node是256B对齐的，所以低8位可以利用。
+
+pnode的低8位，编码了在parent中的slot位置和type -- mte_parent_slot()/mas_parent_type().
+
+                            7            2  1  0
+ +-------------------------+------------+--+--+--+
+ |                         |            |  |32|R |
+ +-------------------------+------------+--+--+--+
+                           |<-   slot    ->| type|16 bit node
+                           |<-  slot  ->|< type >|32/64 bit node
+
+See comment Parent Pointer for more detail.
+
 0.2.2 maple_enode, maple encoded node
 ================================================================================
+
+因为node是256B对齐的，所以低8位可以利用。
+
+enode的低8位，编码了maple_type -- mte_node_type()/mt_mk_node().
+
+                            7  6         2  1  0
+ +-------------------------+--+---------+--+--+--+
+ |                         |  | type    |1 |  |  |
+ +-------------------------+--+---------+--+--+--+
+
+ root node: bit 0 set
 
 0.2.3 maple_range_64
 ================================================================================
