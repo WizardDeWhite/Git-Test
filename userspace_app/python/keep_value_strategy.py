@@ -1,5 +1,6 @@
 #!/usr/bin/python
 increment = 0.1
+target_price = 1.5
 if __name__ == "__main__":
     initial_price = 1.0
     shares = 100
@@ -9,7 +10,7 @@ if __name__ == "__main__":
 
     
     current_price = initial_price * (1 + increment)
-    while current_price < 1.5:
+    while current_price < target_price:
         current_value = shares * current_price
 
         print('+{:.2%}'.format(increment))
@@ -32,9 +33,9 @@ if __name__ == "__main__":
 
         current_price *= (1 + increment)
     
-    current_price = 1.5
+    current_price = target_price
     current_value = shares * current_price
-    print "1.5"
+    print "%0.2f" % target_price
     print("\tlast shares %d" % shares)
     print("\tlast price %0.3f" % current_price)
     print("\tlast value %0.3f" % current_value)
