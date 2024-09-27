@@ -144,6 +144,10 @@ maple tree operation:
 
   mte_mk_root(): make an enode to root node, by set bit 1
   mte_safe_root(): convert root node to enode, by clearing bit 1
+
+  mte_is_root(): call ma_is_root(mte_to_node(enode))
+
+  ma_is_root(): node->parent bit 0 is set
   
     maple_node (1 + 31) * 8 = 256 byte
     +--------------------------------------------+
@@ -635,3 +639,30 @@ After:
     +------+......+------+......+------+......+------+......+------+......+
     |             |                                         |             |
     |<-mas_mab_cp>|<---           modified              --->|<-mas_mab_cp>|
+
+0.12 mas_ascend()
+================================================================================
+
+Before:
+
+                        +----------------+
+                 pnode  |                |
+                        +----------------+
+                        /
+          +----------------+
+ mas->node|                |    
+          +----------------+
+	  mas->min         mas->max
+
+Want:
+
+                        +----------------+
+               mas->node|                |
+                        +----------------+
+	                mas->min         mas->max
+                        /
+          +----------------+
+   node   |                |    
+          +----------------+
+
+ In order to get correct mas->min/max, we may go up several level up.
