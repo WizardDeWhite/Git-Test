@@ -12,20 +12,22 @@ increment = args.increment
 target_price = args.target_price
 if __name__ == "__main__":
     initial_price = 1.0
-    shares = 100
+    shares = 10000
     initial_value = initial_price * shares
-    threshold = 100
+    threshold = initial_value
     total_value = 0.0
+    iteration = 0
 
-    
     current_price = initial_price * (1 + increment)
     while current_price < target_price:
+        iteration += 1
         current_value = shares * current_price
 
+        print("Round %d:" % iteration)
         print('+{:.2%}'.format(increment))
         print("\tcurrent shares %d" % shares)
-        print("\tcurrent price %0.3f" % current_price)
-        print("\tcurrent value %0.3f" % current_value)
+        print("\tcurrent price %0.5f" % current_price)
+        print("\tcurrent value %0.5f" % current_value)
 
         if current_value > threshold:
             sell_value = current_value - threshold
@@ -36,7 +38,7 @@ if __name__ == "__main__":
             total_value += sell_value
 
             print("\tsell shares %d" % sell_shares)
-            print("\tsell value %0.3f" % sell_value)
+            print("\tsell value %0.5f" % sell_value)
         else:
             print("not enough for sale")
 
@@ -46,9 +48,10 @@ if __name__ == "__main__":
     current_value = shares * current_price
     print("%0.2f" % target_price)
     print("\tlast shares %d" % shares)
-    print("\tlast price %0.3f" % current_price)
-    print("\tlast value %0.3f" % current_value)
+    print("\tlast price %0.5f" % current_price)
+    print("\tlast value %0.5f" % current_value)
 
     total_value += current_value
-    print("total value %0.3f" % total_value)
-    print("total profit %0.3f" % (total_value - initial_value ))
+    print("total iterations %d" % iteration)
+    print("total value %0.5f" % total_value)
+    print("total profit %0.5f" % (total_value - initial_value ))
