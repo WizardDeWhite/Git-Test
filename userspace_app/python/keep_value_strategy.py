@@ -1,6 +1,15 @@
 #!/usr/bin/python
-increment = 0.1
-target_price = 1.5
+import argparse
+
+parser = argparse.ArgumentParser(description='do keey value strategy')
+parser.add_argument("-t", "--target_price", type=float, default=1.5,
+                  help="target price")
+parser.add_argument("-i", "--increment", type=float, default=0.1,
+                  help="increment step")
+args = parser.parse_args()
+
+increment = args.increment
+target_price = args.target_price
 if __name__ == "__main__":
     initial_price = 1.0
     shares = 100
@@ -35,7 +44,7 @@ if __name__ == "__main__":
     
     current_price = target_price
     current_value = shares * current_price
-    print "%0.2f" % target_price
+    print("%0.2f" % target_price)
     print("\tlast shares %d" % shares)
     print("\tlast price %0.3f" % current_price)
     print("\tlast value %0.3f" % current_value)
