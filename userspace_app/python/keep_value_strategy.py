@@ -1,25 +1,31 @@
 #!/usr/bin/python
 import argparse
 
-parser = argparse.ArgumentParser(description='do keey value strategy')
-parser.add_argument("-t", "--target_price", type=float, default=1.5,
-                  help="target price")
-parser.add_argument("-i", "--increment", type=float, default=0.1,
-                  help="increment step")
+parser = argparse.ArgumentParser(description='do keep value strategy')
+parser.add_argument("-t", "--target_gap", type=float, default=0.5,
+                  help="target total increase/decrease gap")
+parser.add_argument("-s", "--step", type=float, default=0.1,
+                  help="increment/decrement step")
 parser.add_argument("-v", "--verbose", action='store_true',
                   help='print middle steps')
+parser.add_argument("-d", "--decrease", action='store_true',
+                  help='calculate decrease')
 args = parser.parse_args()
 
-increment = args.increment
-target_price = args.target_price
+step = args.step
+initial_price = 1.0
+if args.decrease == False:
+    target_price = initial_price + args.target_gap
+else:
+    target_price = initial_price - args.target_gap
+initial_shares = 10000
+initial_value = initial_price * initial_shares
 def increase():
-    initial_price = 1.0
-    shares = 10000
-    initial_value = initial_price * shares
+    shares = initial_shares
     total_value = 0.0
     iteration = 0
 
-    current_price = initial_price * (1 + increment)
+    current_price = initial_price * (1 + step)
     while current_price < target_price:
         iteration += 1
         current_value = shares * current_price
@@ -30,7 +36,7 @@ def increase():
         total_value += sell_value
 
         if args.verbose:
-            print("Round %d: +%0.2f%%" % (iteration, increment * 100))
+            print("Round %d: +%0.2f%%" % (iteration, step * 100))
             print("\tcurrent shares %d" % shares)
             print("\tcurrent price %0.5f" % current_price)
             print("\tcurrent value %0.5f" % current_value)
@@ -39,7 +45,7 @@ def increase():
             print("\tleft shares %d" % (shares - sell_shares))
 
         shares -= sell_shares
-        current_price *= (1 + increment)
+        current_price *= (1 + step)
     
     current_price = target_price
     current_value = shares * current_price
@@ -55,4 +61,5 @@ def increase():
     print("total profit %0.5f(+%0.2f%%)" % (profit, (profit / initial_value) * 100))
 
 if __name__ == "__main__":
-    increase()
+    if args.decrease == False:
+        increase()
