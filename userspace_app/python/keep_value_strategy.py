@@ -14,7 +14,6 @@ if __name__ == "__main__":
     initial_price = 1.0
     shares = 10000
     initial_value = initial_price * shares
-    threshold = initial_value
     total_value = 0.0
     iteration = 0
 
@@ -29,18 +28,17 @@ if __name__ == "__main__":
         print("\tcurrent price %0.5f" % current_price)
         print("\tcurrent value %0.5f" % current_value)
 
-        if current_value > threshold:
-            sell_value = current_value - threshold
-            sell_shares = int(sell_value / current_price)
-            sell_value = sell_shares * current_price
-            shares -= sell_shares
-            current_value = shares * current_price
-            total_value += sell_value
+        sell_value = current_value - initial_value
+        sell_shares = int(sell_value / current_price)
+        sell_value = sell_shares * current_price
+        shares -= sell_shares
+        current_value = shares * current_price
+        total_value += sell_value
 
-            print("\tsell shares %d" % sell_shares)
-            print("\tsell value %0.5f" % sell_value)
-        else:
-            print("not enough for sale")
+        print("\tsell shares %d" % sell_shares)
+        print("\tsell value %0.5f" % sell_value)
+        print("\tleft shares %d" % shares)
+        print("\tleft shares %d" % shares)
 
         current_price *= (1 + increment)
     
