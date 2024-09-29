@@ -6,6 +6,8 @@ parser.add_argument("-t", "--target_price", type=float, default=1.5,
                   help="target price")
 parser.add_argument("-i", "--increment", type=float, default=0.1,
                   help="increment step")
+parser.add_argument("-v", "--verbose", action='store_true',
+                  help='print middle steps')
 args = parser.parse_args()
 
 increment = args.increment
@@ -27,13 +29,14 @@ def increase():
         sell_value = sell_shares * current_price
         total_value += sell_value
 
-        print("Round %d: +%0.2f%%" % (iteration, increment * 100))
-        print("\tcurrent shares %d" % shares)
-        print("\tcurrent price %0.5f" % current_price)
-        print("\tcurrent value %0.5f" % current_value)
-        print("\tsell shares %d" % sell_shares)
-        print("\tsell value %0.5f(%0.5f)" % (sell_value, total_value))
-        print("\tleft shares %d" % (shares - sell_shares))
+        if args.verbose:
+            print("Round %d: +%0.2f%%" % (iteration, increment * 100))
+            print("\tcurrent shares %d" % shares)
+            print("\tcurrent price %0.5f" % current_price)
+            print("\tcurrent value %0.5f" % current_value)
+            print("\tsell shares %d" % sell_shares)
+            print("\tsell value %0.5f(%0.5f)" % (sell_value, total_value))
+            print("\tleft shares %d" % (shares - sell_shares))
 
         shares -= sell_shares
         current_price *= (1 + increment)
