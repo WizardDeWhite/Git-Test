@@ -10,7 +10,7 @@ args = parser.parse_args()
 
 increment = args.increment
 target_price = args.target_price
-if __name__ == "__main__":
+def increase():
     initial_price = 1.0
     shares = 10000
     initial_value = initial_price * shares
@@ -50,3 +50,6 @@ if __name__ == "__main__":
     print("total value %0.5f" % total_value)
     profit = total_value - initial_value
     print("total profit %0.5f(+%0.2f%%)" % (profit, (profit / initial_value) * 100))
+
+if __name__ == "__main__":
+    increase()
