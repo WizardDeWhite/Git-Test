@@ -22,8 +22,7 @@ if __name__ == "__main__":
         iteration += 1
         current_value = shares * current_price
 
-        print("Round %d:" % iteration)
-        print('+{:.2%}'.format(increment))
+        print("Round %d: +%0.2f%%" % (iteration, increment * 100))
         print("\tcurrent shares %d" % shares)
         print("\tcurrent price %0.5f" % current_price)
         print("\tcurrent value %0.5f" % current_value)
@@ -45,7 +44,7 @@ if __name__ == "__main__":
     
     current_price = target_price
     current_value = shares * current_price
-    print("%0.2f" % target_price)
+    print("Final Price: %0.2f(+%0.2f%%)" % (target_price, (target_price - 1.0) / 1.0))
     print("\tlast shares %d" % shares)
     print("\tlast price %0.5f" % current_price)
     print("\tlast value %0.5f" % current_value)
@@ -53,4 +52,5 @@ if __name__ == "__main__":
     total_value += current_value
     print("total iterations %d" % iteration)
     print("total value %0.5f" % total_value)
-    print("total profit %0.5f" % (total_value - initial_value ))
+    profit = total_value - initial_value
+    print("total profit %0.5f(+%0.2f%%)" % (profit, (profit / initial_value) * 100))
