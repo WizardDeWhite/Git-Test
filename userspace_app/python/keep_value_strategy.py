@@ -30,6 +30,7 @@ if __name__ == "__main__":
 
         sell_value = current_value - initial_value
         sell_shares = int(sell_value / current_price)
+        sell_shares -= sell_shares % 100
         sell_value = sell_shares * current_price
         shares -= sell_shares
         current_value = shares * current_price
