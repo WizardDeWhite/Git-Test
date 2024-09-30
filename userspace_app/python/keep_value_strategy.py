@@ -2,6 +2,8 @@
 import argparse
 
 parser = argparse.ArgumentParser(description='do keep value strategy')
+parser.add_argument("-p", "--initial_price", type=float, default=1.0,
+                  help="initial price")
 parser.add_argument("-t", "--target_gap", type=float, default=0.5,
                   help="target total increase/decrease gap")
 parser.add_argument("-s", "--step", type=float, default=0.1,
@@ -12,16 +14,22 @@ parser.add_argument("-d", "--decrease", action='store_true',
                   help='calculate decrease')
 args = parser.parse_args()
 
-step = args.step
-def increase(initial_price, shares, step):
+if args.decrease == False:
+    step = args.step
+    target_gap = args.target_gap
+else:
+    step = -args.step
+    target_gap = -args.target_gap
+
+def increase(initial_price, target_gap, shares, step):
     total_value = 0.0
     iteration = 0
 
-    if (step < 0):
+    if (step <= 0):
         print("ERROR: Increase with negative step is not reasonable")
         return
 
-    target_price = initial_price + args.target_gap
+    target_price = initial_price + target_gap
     if (target_price < initial_price):
         print("ERROR: Increase with smaller target price is not reasonable")
         return
@@ -52,7 +60,7 @@ def increase(initial_price, shares, step):
     current_price = target_price
     current_value = shares * current_price
     print("Final Price: %0.2f(+%0.2f%%) with step +%0.2f%%" %
-            (target_price, (target_price - 1.0) * 100, step * 100))
+            (target_price, (target_price - initial_price) * 100, step * 100))
     print("\tlast shares %d" % shares)
     print("\tlast price %0.5f" % current_price)
     print("\tlast value %0.5f" % current_value)
@@ -63,10 +71,64 @@ def increase(initial_price, shares, step):
     profit = total_value - initial_value
     print("total profit %0.5f(+%0.2f%%)" % (profit, (profit / initial_value) * 100))
 
-def decrease():
-    total_value = 0.0
+def decrease(initial_price, target_gap, shares, step):
+    total_buy = 0.0
     iteration = 0
+
+    if (step >= 0):
+        print("ERROR: Decrease with positive step is not reasonable")
+        return
+
+    target_price = initial_price + target_gap
+    if (target_price > initial_price):
+        print("ERROR: Decrease with greater target price is not reasonable")
+        return
+
+    initial_value = initial_price * shares
+    current_price = initial_price * (1 + step)
+    while current_price > target_price:
+        iteration += 1
+        current_value = shares * current_price
+        buy_value = initial_value - current_value
+        buy_shares = int(buy_value / current_price)
+        buy_shares -= buy_shares % 100
+        buy_value = buy_shares * current_price
+        total_buy += buy_value
+
+        if args.verbose:
+            print("Round %d: %0.2f%%" % (iteration, step * 100))
+            print("\tcurrent shares %d" % shares)
+            print("\tcurrent price %0.5f" % current_price)
+            print("\tcurrent value %0.5f" % current_value)
+            print("\tbuy shares %d" % buy_shares)
+            print("\tbuy value %0.5f(%0.5f)" % (buy_value, total_buy))
+            print("\tvalue after buy %0.5f" % (current_value + buy_value))
+            print("\tleft shares %d" % (shares + buy_shares))
+
+        shares += buy_shares
+        current_price *= (1 + step)
+
+    current_price = target_price
+    current_value = shares * current_price
+    buy_value = initial_value - current_value
+    buy_shares = int(buy_value / current_price)
+    buy_shares -= buy_shares % 100
+    buy_value = buy_shares * current_price
+    total_buy += buy_value
+    print("Final Price: %0.2f(%0.2f%%) with step %0.2f%%" %
+            (target_price, (initial_price - target_price) * 100, step * 100))
+    print("\tlast shares %d" % shares)
+    print("\tlast price %0.5f" % current_price)
+    print("\tlast value %0.5f" % current_value)
+    print("\tlast buy shares %d" % buy_shares)
+    print("\tlast buy value %0.5f(%0.5f)" % (buy_value, total_buy))
+    print("\tlast value %0.5f" % (current_value + buy_value))
+
+    print("total iterations %d" % iteration)
+    print("total buy %0.5f(+%0.2f%%)" % (total_buy, (total_buy / initial_value) * 100))
 
 if __name__ == "__main__":
     if args.decrease == False:
-        increase(1.0, 1000000, step)
+        increase(args.initial_price, target_gap, 1000000, step)
+    else:
+        decrease(args.initial_price, target_gap, 1000000, step)
