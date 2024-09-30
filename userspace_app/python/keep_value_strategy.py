@@ -13,18 +13,20 @@ parser.add_argument("-d", "--decrease", action='store_true',
 args = parser.parse_args()
 
 step = args.step
-initial_price = 1.0
-if args.decrease == False:
-    target_price = initial_price + args.target_gap
-else:
-    target_price = initial_price - args.target_gap
-initial_shares = 10000
-initial_value = initial_price * initial_shares
-def increase():
-    shares = initial_shares
+def increase(initial_price, shares, step):
     total_value = 0.0
     iteration = 0
 
+    if (step < 0):
+        print("ERROR: Increase with negative step is not reasonable")
+        return
+
+    target_price = initial_price + args.target_gap
+    if (target_price < initial_price):
+        print("ERROR: Increase with smaller target price is not reasonable")
+        return
+
+    initial_value = initial_price * shares
     current_price = initial_price * (1 + step)
     while current_price < target_price:
         iteration += 1
@@ -49,7 +51,8 @@ def increase():
     
     current_price = target_price
     current_value = shares * current_price
-    print("Final Price: %0.2f(+%0.2f%%)" % (target_price, (target_price - 1.0) / 1.0))
+    print("Final Price: %0.2f(+%0.2f%%) with step +%0.2f%%" %
+            (target_price, (target_price - 1.0) * 100, step * 100))
     print("\tlast shares %d" % shares)
     print("\tlast price %0.5f" % current_price)
     print("\tlast value %0.5f" % current_value)
@@ -60,6 +63,10 @@ def increase():
     profit = total_value - initial_value
     print("total profit %0.5f(+%0.2f%%)" % (profit, (profit / initial_value) * 100))
 
+def decrease():
+    total_value = 0.0
+    iteration = 0
+
 if __name__ == "__main__":
     if args.decrease == False:
-        increase()
+        increase(1.0, 1000000, step)
