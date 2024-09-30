@@ -6,6 +6,8 @@ parser.add_argument("-p", "--initial_price", type=float, default=1.0,
                   help="initial price")
 parser.add_argument("-t", "--target_price", type=float, default=1.5,
                   help="target total increase/decrease gap")
+parser.add_argument("-n", "--number_shares", type=int, default=1000000,
+                  help="number of shares")
 parser.add_argument("-s", "--step", type=float, default=0.1,
                   help="increment/decrement step")
 parser.add_argument("-v", "--verbose", action='store_true',
@@ -126,6 +128,6 @@ def decrease(initial_price, target_price, shares, step):
 
 if __name__ == "__main__":
     if args.decrease == False:
-        increase(args.initial_price, target_price, 1000000, step)
+        increase(args.initial_price, target_price, args.number_shares, step)
     else:
-        decrease(args.initial_price, target_price, 1000000, step)
+        decrease(args.initial_price, target_price, args.number_shares, step)
