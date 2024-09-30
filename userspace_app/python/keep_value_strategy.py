@@ -4,7 +4,7 @@ import argparse
 parser = argparse.ArgumentParser(description='do keep value strategy')
 parser.add_argument("-p", "--initial_price", type=float, default=1.0,
                   help="initial price")
-parser.add_argument("-t", "--target_gap", type=float, default=0.5,
+parser.add_argument("-t", "--target_price", type=float, default=1.5,
                   help="target total increase/decrease gap")
 parser.add_argument("-s", "--step", type=float, default=0.1,
                   help="increment/decrement step")
@@ -14,14 +14,13 @@ parser.add_argument("-d", "--decrease", action='store_true',
                   help='calculate decrease')
 args = parser.parse_args()
 
+target_price = args.target_price
 if args.decrease == False:
     step = args.step
-    target_gap = args.target_gap
 else:
     step = -args.step
-    target_gap = -args.target_gap
 
-def increase(initial_price, target_gap, shares, step):
+def increase(initial_price, target_price, shares, step):
     total_value = 0.0
     iteration = 0
 
@@ -29,7 +28,6 @@ def increase(initial_price, target_gap, shares, step):
         print("ERROR: Increase with negative step is not reasonable")
         return
 
-    target_price = initial_price + target_gap
     if (target_price < initial_price):
         print("ERROR: Increase with smaller target price is not reasonable")
         return
@@ -71,7 +69,7 @@ def increase(initial_price, target_gap, shares, step):
     profit = total_value - initial_value
     print("total profit %0.5f(+%0.2f%%)" % (profit, (profit / initial_value) * 100))
 
-def decrease(initial_price, target_gap, shares, step):
+def decrease(initial_price, target_price, shares, step):
     total_buy = 0.0
     iteration = 0
 
@@ -79,7 +77,6 @@ def decrease(initial_price, target_gap, shares, step):
         print("ERROR: Decrease with positive step is not reasonable")
         return
 
-    target_price = initial_price + target_gap
     if (target_price > initial_price):
         print("ERROR: Decrease with greater target price is not reasonable")
         return
@@ -129,6 +126,6 @@ def decrease(initial_price, target_gap, shares, step):
 
 if __name__ == "__main__":
     if args.decrease == False:
-        increase(args.initial_price, target_gap, 1000000, step)
+        increase(args.initial_price, target_price, 1000000, step)
     else:
-        decrease(args.initial_price, target_gap, 1000000, step)
+        decrease(args.initial_price, target_price, 1000000, step)
