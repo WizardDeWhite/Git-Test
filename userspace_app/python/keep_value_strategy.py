@@ -116,12 +116,13 @@ def decrease(initial_price, target_price, shares, step):
     total_buy += buy_value
     print("Final Price: %0.2f(%0.2f%0.2f%%) with step %0.2f%%" %
             (target_price, initial_price, (target_price - initial_price ) * 100, step * 100))
-    print("\tlast shares %d" % shares)
-    print("\tlast price %0.5f" % current_price)
-    print("\tlast value %0.5f" % current_value)
+    print("\tcurrent shares %d" % shares)
+    print("\tcurrent price %0.5f" % current_price)
+    print("\tcurrent value %0.5f" % current_value)
     print("\tlast buy shares %d" % buy_shares)
     print("\tlast buy value %0.5f(%0.5f)" % (buy_value, total_buy))
-    print("\tlast value %0.5f" % (current_value + buy_value))
+    print("\tfinal value %0.5f" % (current_value + buy_value))
+    print("\tfinal shares %d" % (shares + buy_shares))
 
     print("total iterations %d" % iteration)
     print("total buy %0.5f(+%0.2f%%)" % (total_buy, (total_buy / initial_value) * 100))
