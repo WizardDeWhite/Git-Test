@@ -70,6 +70,7 @@ def increase(initial_price, target_price, shares, step):
     print("total value %0.5f" % total_value)
     profit = total_value - initial_value
     print("total profit %0.5f(+%0.2f%%)" % (profit, (profit / initial_value) * 100))
+    return shares
 
 def decrease(initial_price, target_price, shares, step):
     total_buy = 0.0
@@ -126,6 +127,7 @@ def decrease(initial_price, target_price, shares, step):
 
     print("total iterations %d" % iteration)
     print("total buy %0.5f(+%0.2f%%)" % (total_buy, (total_buy / initial_value) * 100))
+    return shares + buy_shares
 
 if __name__ == "__main__":
     if args.decrease == False:
