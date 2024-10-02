@@ -14,6 +14,8 @@ parser.add_argument("-v", "--verbose", action='store_true',
                   help='print middle steps')
 parser.add_argument("-d", "--decrease", action='store_true',
                   help='calculate decrease')
+parser.add_argument("-r", "--rounds", type=int, default=0,
+                  help='calculate decrease')
 args = parser.parse_args()
 
 target_price = args.target_price
@@ -69,8 +71,8 @@ def increase(initial_price, target_price, shares, step):
     print("total iterations %d" % iteration)
     print("total value %0.5f" % total_value)
     profit = total_value - initial_value
-    print("total profit %0.5f(+%0.2f%%)" % (profit, (profit / initial_value) * 100))
-    return shares
+    print("total profit %0.5f(+%0.2f%%)\n" % (profit, (profit / initial_value) * 100))
+    return shares, profit
 
 def decrease(initial_price, target_price, shares, step):
     total_buy = 0.0
@@ -126,11 +128,39 @@ def decrease(initial_price, target_price, shares, step):
     print("\tfinal shares %d" % (shares + buy_shares))
 
     print("total iterations %d" % iteration)
-    print("total buy %0.5f(+%0.2f%%)" % (total_buy, (total_buy / initial_value) * 100))
-    return shares + buy_shares
+    print("total buy %0.5f(+%0.2f%%)\n" % (total_buy, (total_buy / initial_value) * 100))
+    return shares + buy_shares, -total_buy
+
+def standalone():
+    if args.decrease == False:
+        result = increase(args.initial_price, target_price, args.number_shares, step)
+        print("Profit %0.5f" % result[1])
+    else:
+        result = decrease(args.initial_price, target_price, args.number_shares, step)
+        print("Cost %0.5f" % result[1])
+
+
+def up_downs(rounds):
+    used_or_get = 0.0
+    shares = args.number_shares
+    for i in range(0, rounds):
+        result = increase(args.initial_price, target_price, shares, step)
+        shares = result[0]
+        used_or_get += result[1]
+        result = decrease(target_price, args.initial_price, shares, -step)
+        shares = result[0]
+        used_or_get += result[1]
+
+    print("After %d round up and down:" % rounds)
+    if used_or_get > 0:
+        print("Extra Profit %0.5f(%0.2f%%)" % (used_or_get, used_or_get * 100 /
+            (args.initial_price * args.number_shares)))
+    else:
+        print("Extra COST %0.5f(%0.5f)" % (used_or_get, used_or_get * 100 /
+            (args.initial_price * args.number_shares)))
 
 if __name__ == "__main__":
-    if args.decrease == False:
-        increase(args.initial_price, target_price, args.number_shares, step)
+    if args.rounds == 0:
+        standalone()
     else:
-        decrease(args.initial_price, target_price, args.number_shares, step)
+        up_downs(args.rounds)
