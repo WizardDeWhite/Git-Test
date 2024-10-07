@@ -55,6 +55,7 @@ def increase(initial_price, target_price, shares, step):
             print("\tsell shares %d" % sell_shares)
             print("\tsell value %0.5f(%0.5f)" % (sell_value, total_value))
             print("\tleft shares %d" % (shares - sell_shares))
+            print("\tleft value %d" % ((shares - sell_shares) * current_price))
 
         shares -= sell_shares
         current_price *= (1 + step)
