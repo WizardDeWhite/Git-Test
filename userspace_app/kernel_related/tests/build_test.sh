@@ -5,5 +5,6 @@ SCRIPT_DIR=$(dirname $SCRIPT_FILE)
 
 source $SCRIPT_DIR/memblock_test.sh
 source $SCRIPT_DIR/maple_tree_test.sh
+source $SCRIPT_DIR/vma_test.sh
 
 while [ true ]; do make clean && time make -j8 bzImage &> /dev/null && date; done
