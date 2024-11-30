@@ -32,12 +32,12 @@ int main(void) {
 
 	getchar();
 
-	// map a 3 times region
-	char * region = mmap(
-	  NULL, // (void *)0x7f3d39000000
-	  mapsize,
-	  PROT_READ|PROT_WRITE|PROT_EXEC,
-	  MAP_ANON|MAP_PRIVATE,
+	/* Map a mapsize range with kernel chosen start address */
+	char *region = mmap(
+	  NULL,					/* kernel choose */
+	  mapsize,				/* map size */
+	  PROT_READ|PROT_WRITE|PROT_EXEC,	/* protection */
+	  MAP_ANON|MAP_PRIVATE,			/* flags */
 	  -1,
 	  0
 	);
@@ -46,8 +46,10 @@ int main(void) {
 		return 1;
 	}
 
-	printf("Map to region: [%p - %p]\n", region, region + mapsize);
-	printf("Exact  region: [%p - %p]\n", region + pagesize, region + pagesize * 2);
+	printf("### After mmap: [%p - %p]\n", region, region + mapsize);
+	read_mmap();
+
+	getchar();
 
 	// write some content to 2nd one
 	strcpy(region + pagesize, "Hello, world!");
@@ -69,19 +71,31 @@ int main(void) {
 		return 1;
 	}
 
+	printf("### After munmap:\n");
+	read_mmap();
 	// show the content still there
+	printf("Expect left region: [%p - %p]\n", region + pagesize, region + pagesize * 2);
 	printf("Contents of region: %s %c\n",
 		  region + pagesize, *(region + 2 * pagesize - 1));
-	printf("### After mmap:\n");
-	read_mmap();
 
 	getchar();
 
 	// move one page shift, can't overlap
-	char *move_region = mremap(region + pagesize, pagesize, pagesize,
-	       MREMAP_FIXED | MREMAP_MAYMOVE, region + (pagesize * 2) + (1 << 12));
+	char *new_addr = region + (pagesize * 2) + (1 << 12);
+	char *move_region = mremap(
+			region + pagesize,		/* old_addr */
+			pagesize,			/* old_size */
+			pagesize,			/* new_size */
+			MREMAP_FIXED | MREMAP_MAYMOVE,	/* flags */
+			new_addr			/* new_addr */
+		);
 	if (move_region == MAP_FAILED) {
 		perror("Could not remap");
+		return 1;
+	}
+
+	if (move_region != new_addr) {
+		printf("mremap failed to move to specified target\n");
 		return 1;
 	}
 
