@@ -134,22 +134,22 @@ def standalone():
 
 
 def up_downs(rounds):
-    used_or_get = 0.0
+    lost_or_profit = 0.0
     shares = args.number_shares
     for i in range(0, rounds):
         result = increase(args.initial_price, target_price, shares, step)
         shares = result[0]
-        used_or_get += result[1]
+        lost_or_profit += result[1]
         result = decrease(target_price, args.initial_price, shares, -step)
         shares = result[0]
-        used_or_get += result[1]
+        lost_or_profit += result[1]
 
     print("After %d round up and down:" % rounds)
-    if used_or_get > 0:
-        print("Extra Profit %0.5f(%0.2f%%)" % (used_or_get, used_or_get * 100 /
+    if lost_or_profit > 0:
+        print("Extra Profit %0.5f(%0.2f%%)" % (lost_or_profit, lost_or_profit * 100 /
             (args.initial_price * args.number_shares)))
     else:
-        print("Extra COST %0.5f(%0.5f)" % (used_or_get, used_or_get * 100 /
+        print("Extra COST %0.5f(%0.5f)" % (lost_or_profit, lost_or_profit * 100 /
             (args.initial_price * args.number_shares)))
 
 if __name__ == "__main__":
