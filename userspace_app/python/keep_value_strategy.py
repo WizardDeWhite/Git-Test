@@ -38,7 +38,7 @@ def increase(initial_price, target_price, shares, step):
 
     initial_value = initial_price * shares
     current_price = initial_price * (1 + step)
-    while current_price < target_price:
+    while current_price <= target_price:
         iteration += 1
         current_value = shares * current_price
         sell_value = current_value - initial_value
