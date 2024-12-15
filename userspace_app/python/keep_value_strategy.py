@@ -72,7 +72,7 @@ def increase(initial_price, target_price, shares, step):
     profit = total_sell + current_value - initial_value
     print("settled profit %0.5f(+%0.2f%%)" % (total_sell, (total_sell / initial_value) * 100))
     print("total   profit %0.5f(+%0.2f%%)\n" % (profit, (profit / initial_value) * 100))
-    return shares, total_sell
+    return shares, profit
 
 def decrease(initial_price, target_price, shares, step):
     total_buy = 0.0
@@ -122,7 +122,7 @@ def decrease(initial_price, target_price, shares, step):
     lost = initial_value - current_value + total_buy
     print("settled lost %0.5f(-%0.2f%%)" % (total_buy, (total_buy / initial_value) * 100))
     print("total   lost %0.5f(-%0.2f%%)" % (lost, (lost / initial_value) * 100))
-    return shares, -total_buy
+    return shares, -lost
 
 def standalone():
     if args.decrease == False:
