@@ -88,7 +88,7 @@ def decrease(initial_price, target_price, shares, step):
 
     initial_value = initial_price * shares
     current_price = initial_price * (1 + step)
-    while current_price > target_price:
+    while current_price >= target_price:
         iteration += 1
         current_value = shares * current_price
         buy_value = initial_value - current_value
@@ -112,24 +112,17 @@ def decrease(initial_price, target_price, shares, step):
 
     current_price = target_price
     current_value = shares * current_price
-    buy_value = initial_value - current_value
-    buy_shares = int(buy_value / current_price)
-    buy_shares -= buy_shares % 100
-    buy_value = buy_shares * current_price
-    total_buy += buy_value
     print("Final Price: %0.2f(%0.2f%0.2f%%) with step %0.2f%%" %
             (target_price, initial_price, (target_price - initial_price ) * 100, step * 100))
-    print("\tcurrent shares %d" % shares)
-    print("\tcurrent price %0.5f" % current_price)
-    print("\tcurrent value %0.5f" % current_value)
-    print("\tlast buy shares %d" % buy_shares)
-    print("\tlast buy value %0.5f(%0.5f)" % (buy_value, total_buy))
-    print("\tfinal value %0.5f" % (current_value + buy_value))
-    print("\tfinal shares %d" % (shares + buy_shares))
+    print("\tfinal shares %d" % shares)
+    print("\tfinal price %0.5f" % current_price)
+    print("\tfinal value %0.5f" % current_value)
+    print("total iterations %d\n" % iteration)
 
-    print("total iterations %d" % iteration)
-    print("total buy %0.5f(+%0.2f%%)\n" % (total_buy, (total_buy / initial_value) * 100))
-    return shares + buy_shares, -total_buy
+    lost = initial_value - current_value + total_buy
+    print("settled lost %0.5f(-%0.2f%%)" % (total_buy, (total_buy / initial_value) * 100))
+    print("total   lost %0.5f(-%0.2f%%)" % (lost, (lost / initial_value) * 100))
+    return shares, -total_buy
 
 def standalone():
     if args.decrease == False:
