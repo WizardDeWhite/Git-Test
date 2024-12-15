@@ -25,7 +25,7 @@ else:
     step = -args.step
 
 def increase(initial_price, target_price, shares, step):
-    total_value = 0.0
+    total_sell = 0.0
     iteration = 0
 
     if (step <= 0):
@@ -45,7 +45,7 @@ def increase(initial_price, target_price, shares, step):
         sell_shares = int(sell_value / current_price)
         sell_shares -= sell_shares % 100
         sell_value = sell_shares * current_price
-        total_value += sell_value
+        total_sell += sell_value
 
         if args.verbose:
             print("Round %d: +%0.2f%%" % (iteration, step * 100))
@@ -53,7 +53,7 @@ def increase(initial_price, target_price, shares, step):
             print("\tcurrent price %0.5f" % current_price)
             print("\tcurrent value %0.5f" % current_value)
             print("\tsell shares %d" % sell_shares)
-            print("\tsell value %0.5f(%0.5f)" % (sell_value, total_value))
+            print("\tsell value %0.5f(%0.5f)" % (sell_value, total_sell))
             print("\tleft shares %d" % (shares - sell_shares))
             print("\tleft value %d" % ((shares - sell_shares) * current_price))
 
@@ -67,13 +67,12 @@ def increase(initial_price, target_price, shares, step):
     print("\tlast shares %d" % shares)
     print("\tlast price %0.5f" % current_price)
     print("\tlast value %0.5f" % current_value)
+    print("total iterations %d\n" % iteration)
 
-    total_value += current_value
-    print("total iterations %d" % iteration)
-    print("total value %0.5f" % total_value)
-    profit = total_value - initial_value
-    print("total profit %0.5f(+%0.2f%%)\n" % (profit, (profit / initial_value) * 100))
-    return shares, profit
+    profit = total_sell + current_value - initial_value
+    print("settled profit %0.5f(+%0.2f%%)" % (total_sell, (total_sell / initial_value) * 100))
+    print("total   profit %0.5f(+%0.2f%%)\n" % (profit, (profit / initial_value) * 100))
+    return shares, total_sell
 
 def decrease(initial_price, target_price, shares, step):
     total_buy = 0.0
