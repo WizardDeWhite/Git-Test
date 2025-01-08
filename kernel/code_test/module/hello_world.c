@@ -39,7 +39,7 @@ static int hello_init(void)
 
 	request_module("e1000e");
 
-	return 0;
+	return -1;
 }
 static void hello_exit(void)
 {
