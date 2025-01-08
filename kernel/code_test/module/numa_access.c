@@ -15,8 +15,7 @@ static int numa_access_init(void)
 	int cpu, nid;
 	int i, j;
 	volatile char tmp;
-	struct timespec ts;
-	s64 timestamp;
+	struct timespec64 ts;
 
 	cpu = get_cpu();
 	printk(KERN_ERR "current cpu: %d\n", cpu);
@@ -45,17 +44,17 @@ static int numa_access_init(void)
 	printk(KERN_ERR "remote mem: %llx\n", page_to_phys(remote_page));
 
 	for (i = 0; i < 5; i++) {
-		getnstimeofday(&ts);
+		ktime_get_ts64(&ts);
 		for (j = 0; j < TEST_ARRAY_SIZE; j++)
 			tmp = local_mem[i];
-		getnstimeofday(&ts);
+		ktime_get_ts64(&ts);
 	}
 
 	for (i = 0; i < 5; i++) {
-		getnstimeofday(&ts);
+		ktime_get_ts64(&ts);
 		for (j = 0; j < TEST_ARRAY_SIZE; j++)
 			tmp = remote_mem[i];
-		getnstimeofday(&ts);
+		ktime_get_ts64(&ts);
 	}
 
 finish:

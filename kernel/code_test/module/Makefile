@@ -3,7 +3,7 @@
 ifneq ($(KERNELRELEASE),)
     obj-m := hello_world.o oops_example.o
     obj-m += usermodehelper.o
-    obj-m += pci_driver.o register_netdev.o
+    obj-m += pci_driver.o # register_netdev.o
     obj-m += bitmap.o numa_access.o
     obj-m += page_allocation.o kthread.o
 # hello_world-objs :=

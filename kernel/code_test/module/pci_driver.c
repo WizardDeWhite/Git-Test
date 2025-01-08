@@ -25,9 +25,9 @@ MODULE_LICENSE("Dual BSD/GPL");
  *
  * Ethernet controller: Intel Corporation 82579LM Gigabit Network Connection 
  */
-static DEFINE_PCI_DEVICE_TABLE(test_e1000_pci_tbl) = {
-	{ PCI_VDEVICE(INTEL, 0x1502), 0 },
-	{ 0, 0, 0, 0, 0, 0, 0 }	/* terminate list */
+static const struct pci_device_id test_e1000_pci_tbl[] = {
+	{ PCI_DEVICE(PCI_VENDOR_ID_INTEL, 0x1502) },
+	{ /* end: all zeroes */ }
 };
 MODULE_DEVICE_TABLE(pci, test_e1000_pci_tbl);
 
@@ -152,6 +152,7 @@ static struct pci_driver test_e1000e_driver = {
 	.remove   = test_e1000_remove,
 };
 
+void __pci_tree_iteration(struct pci_bus *bus);
 void __pci_tree_iteration(struct pci_bus *bus)
 {
 	struct pci_dev *pdev;
@@ -166,6 +167,7 @@ void __pci_tree_iteration(struct pci_bus *bus)
 		__pci_tree_iteration(child);
 }
 
+void pci_tree_iteration(void);
 void pci_tree_iteration(void)
 {
 	struct pci_bus *bus;

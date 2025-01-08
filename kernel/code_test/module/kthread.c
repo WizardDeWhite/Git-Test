@@ -20,7 +20,7 @@ static int event_handler(void * dummy)
 	return 0;
 }
 
-static int kthread_init(void)
+static int kthread_test_init(void)
 {
 	int ret = 0;
 
@@ -34,13 +34,11 @@ static int kthread_init(void)
 
 	return 0;
 }
-static void kthread_exit(void)
+static void kthread_test_exit(void)
 {
         printk(KERN_ALERT "set thread stop state\n");
 	kthread_stop(event_thread);
         printk(KERN_ALERT "Goodbye, cruel world\n");
 }
-module_init(kthread_init);
-module_exit(kthread_exit);
-
-
+module_init(kthread_test_init);
+module_exit(kthread_test_exit);
