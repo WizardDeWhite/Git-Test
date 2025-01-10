@@ -21,12 +21,15 @@
 MODULE_LICENSE("Dual BSD/GPL");
 
 struct typesafe_obj {
-	refcount_t refcnt;
+	refcount_t 	refcnt;
+	spinlock_t	lock;
 };
 
 static void typesafe_init(struct typesafe_obj *obj)
 {
 	memset(obj, 0, sizeof(*obj));
+	spin_lock_init(&obj->lock);
+
 }
 
 static int do_kmem_cache_typesafe(int *total_failures)
@@ -42,6 +45,10 @@ static int do_kmem_cache_typesafe(int *total_failures)
 	buf = kmem_cache_alloc(c, GFP_KERNEL);
 	/* do initialization immediately */
 	typesafe_init(buf);
+	if (spin_is_locked(&buf->lock)) {
+		fail = true;
+		pr_info("buf(%p)->lock is held after init\n", buf);
+	}
 	pr_info("buf(%p)->refcnt: %d\n", buf, refcount_read(&buf->refcnt));
 	/* increase refcnt before freeing */
 	refcount_set(&buf->refcnt, 1);
@@ -50,6 +57,13 @@ static int do_kmem_cache_typesafe(int *total_failures)
 
 	/* rcu read critical section */
 	rcu_read_lock();
+
+	/* hold lock */
+	spin_lock(&buf->lock);
+	if (!spin_is_locked(&buf->lock)) {
+		fail = true;
+		pr_info("buf(%p)->lock is not held after lock\n", buf);
+	}
 
 	kmem_cache_free(c, buf);
 
@@ -65,6 +79,18 @@ static int do_kmem_cache_typesafe(int *total_failures)
 	if (oldcnt != refcount_read(&buf_new->refcnt))
 		fail = true;
 
+	/* expect lock held */
+	if (!spin_is_locked(&buf_new->lock)) {
+		fail = true;
+		pr_info("buf_new(%p)->lock is not held after lock\n", buf_new);
+	}
+
+	/* old user release the lock*/
+	/* if this is not released, buf init buf_new some error happens on
+	 * kmem_cache_destroy().
+	 */
+	// spin_unlock(&buf->lock);
+
 	/* now do the initialization */
 	typesafe_init(buf_new);
 	pr_info("buf_new(%p)->refcnt: %d after initialization\n",
@@ -74,6 +100,16 @@ static int do_kmem_cache_typesafe(int *total_failures)
 		fail = true;
 	if (0 != refcount_read(&buf->refcnt))
 		fail = true;
+
+	/* would lock be released? */
+	if (!spin_is_locked(&buf->lock)) {
+		// fail = true;
+		pr_info("buf(%p)->lock is not held after init\n", buf);
+	}
+
+	/* take/release the lock should work */
+	spin_lock(&buf_new->lock);
+	spin_unlock(&buf_new->lock);
 
 	/* rcu read critical section */
 	rcu_read_unlock();
